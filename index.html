@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#202124" media="(prefers-color-scheme: dark)">
+<title>金龍AI-Pro - 手機上的全能 AI 助理</title>
+<meta name="description" content="金龍AI-Pro 是運行在手機上的全能 AI 助理，會思考也能動手：執行指令、讀寫檔案、控制裝置、定時跑任務。">
+<style>
+/* ==========================================================
+   Material Design 3 色彩權杖
+   ========================================================== */
+:root{
+  --primary:#1a73e8;
+  --on-primary:#ffffff;
+  --primary-container:#e8f0fe;
+  --on-primary-container:#174ea6;
+  --blue:#4285f4; --red:#ea4335; --yellow:#f9ab00; --green:#34a853;
+  --surface:#ffffff;
+  --surface-1:#f8f9fa;
+  --surface-2:#f1f3f4;
+  --on-surface:#202124;
+  --on-surface-2:#3c4043;
+  --on-surface-var:#5f6368;
+  --outline:#dadce0;
+  --outline-var:#e8eaed;
+  --shadow-1:0 1px 2px rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15);
+  --shadow-2:0 1px 3px rgba(60,64,67,.30), 0 4px 8px 3px rgba(60,64,67,.15);
+
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:28px; --r-full:999px;
+
+  /* Material 3 動作緩動曲線 */
+  --e-emph:      cubic-bezier(.2,0,0,1);
+  --e-emph-dec:  cubic-bezier(.05,.7,.1,1);
+  --e-emph-acc:  cubic-bezier(.3,0,.8,.15);
+  --e-std:       cubic-bezier(.2,0,0,1);
+  --e-std-dec:   cubic-bezier(0,0,0,1);
+  --e-std-acc:   cubic-bezier(.3,0,1,1);
+
+  /* Material 3 時長 */
+  --d-s1:50ms; --d-s2:100ms; --d-s3:150ms; --d-s4:200ms;
+  --d-m1:250ms; --d-m2:300ms; --d-l1:450ms; --d-l2:500ms;
+
+  /* 進場動畫專用時長：覺得太快就調這一個數字 */
+  --d-reveal:760ms;
+
+  --font:'Google Sans',Roboto,'Noto Sans TC','PingFang TC','Microsoft JhengHei',-apple-system,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --bar:64px;
+  --page:1120px;
+}
+html[data-theme="dark"]{
+  --primary:#8ab4f8;
+  --on-primary:#202124;
+  --primary-container:#1f3355;
+  --on-primary-container:#d3e3fd;
+  --surface:#202124;
+  --surface-1:#292a2d;
+  --surface-2:#303134;
+  --on-surface:#e8eaed;
+  --on-surface-2:#dadce0;
+  --on-surface-var:#9aa0a6;
+  --outline:#3c4043;
+  --outline-var:#2f3033;
+  --shadow-1:0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+  --shadow-2:0 1px 3px rgba(0,0,0,.3), 0 4px 8px 3px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  font-size:15px;line-height:1.65;
+  color:var(--on-surface);background:var(--surface);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  transition:background-color var(--d-s4) var(--e-std), color var(--d-s4) var(--e-std);
+}
+a{color:var(--primary);text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{display:block}
+.wrap{max-width:var(--page);margin:0 auto;padding:0 24px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ==========================================================
+   漣漪（Material ripple）— 輕、快、短
+   ========================================================== */
+.rip-host{position:relative;overflow:hidden;isolation:isolate;-webkit-tap-highlight-color:transparent}
+.rip-host>.rip{
+  position:absolute;border-radius:50%;background:currentColor;opacity:.10;
+  transform:scale(0);pointer-events:none;animation:rip var(--d-l1) var(--e-std-dec) forwards;
+}
+@keyframes rip{to{transform:scale(2.2);opacity:0}}
+
+/* ==========================================================
+   頂部應用程式列
+   ========================================================== */
+.appbar{
+  position:sticky;top:0;z-index:60;
+  background:var(--surface);
+  transition:background-color var(--d-s4) var(--e-std);
+}
+.appbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:var(--outline);opacity:0;
+  transition:opacity var(--d-s4) var(--e-std);
+  box-shadow:0 1px 3px rgba(60,64,67,.18);
+}
+.appbar.stuck::after{opacity:1}
+.bar{height:var(--bar);display:flex;align-items:center;gap:4px;max-width:var(--page);margin:0 auto;padding:0 12px}
+.brand{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-xs);margin-right:16px}
+.brand:hover{background:var(--surface-2)}
+.wordmark{display:flex;font-size:21px;font-weight:500;letter-spacing:-.4px;line-height:1}
+.wordmark i{font-style:normal}
+.w1{color:var(--blue)}.w2{color:var(--red)}.w3{color:var(--yellow)}.w4{color:var(--green)}
+.wordmark small{font-size:12px;font-weight:400;color:var(--on-surface-var);align-self:flex-end;padding:0 0 2px 4px;letter-spacing:0}
+
+nav.main{position:relative;display:flex;align-items:center;gap:0;height:100%}
+nav.main a{
+  position:relative;font-size:14px;font-weight:500;color:var(--on-surface-var);
+  padding:0 16px;height:100%;display:flex;align-items:center;white-space:nowrap;
+  transition:color var(--d-s4) var(--e-std),background-color var(--d-s4) var(--e-std);
+}
+nav.main a:hover{color:var(--on-surface);background:var(--surface-2)}
+nav.main a.on{color:var(--primary)}
+.ind{
+  position:absolute;bottom:0;width:1px;height:3px;border-radius:0 3px 3px 0;background:var(--primary);
+  transform-origin:left center;pointer-events:none;will-change:transform;
+  transition:transform var(--d-m2) var(--e-emph), opacity var(--d-s4) linear;
+  opacity:0;
+}
+.ind.show{opacity:1}
+.grow{flex:1}
+.iconbtn{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  color:var(--on-surface-var);flex:0 0 40px;
+  transition:background-color var(--d-s4) var(--e-std),color var(--d-s4) var(--e-std);
+}
+.iconbtn:hover{background:var(--surface-2);color:var(--on-surface)}
+.iconbtn:active{background:var(--outline-var)}
+.avatar{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:0 0 32px;
+  background:var(--primary-container);color:var(--on-primary-container);
+  font-size:13px;font-weight:500;margin-left:6px;
+  transition:box-shadow var(--d-s4) var(--e-std);
+}
+.avatar:hover{box-shadow:var(--shadow-1)}
+.menubtn{display:none}
+@media(max-width:900px){nav.main{display:none}.menubtn{display:grid}}
+
+/* 九宮格面板 */
+.sheet{
+  position:absolute;top:56px;right:12px;width:272px;z-index:70;
+  background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-2);padding:14px 10px;
+  transform-origin:top right;
+  opacity:0;transform:scale(.94) translateY(-6px);pointer-events:none;
+  transition:opacity var(--d-s4) var(--e-emph-dec), transform var(--d-m1) var(--e-emph-dec);
+}
+.sheet.open{opacity:1;transform:none;pointer-events:auto}
+.sheet .title{font-size:12px;font-weight:500;color:var(--on-surface-var);text-align:center;padding:2px 0 10px}
+.sheet .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.sheet a{
+  display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;
+  border-radius:var(--r-md);color:var(--on-surface-2);font-size:11.5px;text-align:center;
+  transition:background-color var(--d-s4) var(--e-std);
+}
+.sheet a:hover{background:var(--surface-2)}
+.sheet svg{width:22px;height:22px;color:var(--on-surface-var)}
+
+/* ==========================================================
+   首屏
+   ========================================================== */
+.hero{padding:88px 24px 56px;text-align:center;max-width:720px;margin:0 auto}
+.hero .mark{
+  display:flex;justify-content:center;align-items:baseline;gap:1px;
+  font-size:clamp(40px,9vw,68px);font-weight:500;letter-spacing:-2.5px;line-height:1.05;
+  margin-bottom:18px;
+}
+.hero .mark small{font-size:.36em;font-weight:400;color:var(--on-surface-var);letter-spacing:0;padding-left:10px}
+.tagline{
+  font-size:clamp(15px,2.4vw,17px);color:var(--on-surface-var);
+  max-width:520px;margin:0 auto 40px;letter-spacing:.1px;
+}
+
+.searchbar{
+  display:flex;align-items:center;gap:14px;height:52px;padding:0 20px;
+  background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-full);
+  transition:box-shadow var(--d-m1) var(--e-emph), border-color var(--d-m1) var(--e-emph), background-color var(--d-s4) var(--e-std);
+}
+.searchbar:hover{box-shadow:var(--shadow-2);border-color:transparent}
+.searchbar:focus-within{box-shadow:var(--shadow-2);border-color:transparent}
+.searchbar input{
+  flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--on-surface);
+  font-family:var(--font);font-size:16px;
+}
+.searchbar input::placeholder{color:var(--on-surface-var)}
+.sbico{flex:0 0 auto;width:24px;height:24px;color:var(--on-surface-var);display:grid;place-items:center}
+.sbico svg{width:22px;height:22px}
+.sbsep{width:1px;height:24px;background:var(--outline)}
+.sbico.btn{cursor:pointer;border-radius:50%;transition:color var(--d-s4) var(--e-std)}
+.sbico.btn:hover{color:var(--primary)}
+.hint{height:20px;margin-top:12px;font-size:12.5px;color:var(--on-surface-var);opacity:0;transition:opacity var(--d-s4) var(--e-std)}
+.hint.on{opacity:1}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+
+/* 按鈕 */
+.btn{
+  height:40px;padding:0 26px;border-radius:var(--r-full);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-size:14px;font-weight:500;border:1px solid transparent;white-space:nowrap;
+  transition:background-color var(--d-s4) var(--e-std), box-shadow var(--d-s4) var(--e-std),
+             transform var(--d-s2) var(--e-std), border-color var(--d-s4) var(--e-std), color var(--d-s4) var(--e-std),
+             filter var(--d-s4) var(--e-std);
+}
+.btn svg{width:18px;height:18px}
+.btn.filled{background:var(--primary);color:var(--on-primary)}
+.btn.filled:hover{box-shadow:var(--shadow-1);filter:brightness(1.04)}
+.btn.outlined{border-color:var(--outline);color:var(--primary)}
+.btn.outlined:hover{background:var(--primary-container);border-color:transparent}
+.btn.quiet{background:var(--surface-1);color:var(--on-surface-2)}
+.btn.quiet:hover{background:var(--surface-2)}
+.btn:active{transform:scale(.975)}
+.btn.sm{height:36px;padding:0 18px;font-size:13.5px}
+
+/* ==========================================================
+   區塊
+   ========================================================== */
+section{padding:88px 0;scroll-margin-top:calc(var(--bar) + 16px)}
+.sec-head{max-width:680px;margin:0 auto 48px;text-align:center}
+.eyebrow{font-size:12px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:14px}
+h2{font-size:clamp(24px,3.4vw,34px);font-weight:400;letter-spacing:-.8px;line-height:1.25;margin-bottom:14px}
+.sec-head p{color:var(--on-surface-var);font-size:15.5px}
+
+/* 卡片 */
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(272px,1fr))}
+.card{
+  background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);padding:28px;
+  transition:box-shadow var(--d-m1) var(--e-std), border-color var(--d-m1) var(--e-std), transform var(--d-m1) var(--e-emph), opacity var(--d-m1) var(--e-std);
+}
+.card:hover{box-shadow:var(--shadow-1);border-color:transparent;transform:translateY(-2px)}
+.card .ic{width:24px;height:24px;color:var(--primary);margin-bottom:20px}
+.card h3{font-size:16px;font-weight:500;letter-spacing:-.1px;margin-bottom:8px}
+.card p{color:var(--on-surface-var);font-size:14.5px}
+.card .go{
+  display:inline-flex;align-items:center;gap:6px;margin-top:18px;
+  font-size:14px;font-weight:500;color:var(--primary);
+}
+.card .go svg{width:16px;height:16px;transition:transform var(--d-m1) var(--e-emph)}
+.card:hover .go svg{transform:translateX(3px)}
+.card.fade{opacity:.32}
+
+/* 能力清單（極簡格線，無框） */
+.capgrid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--outline-var);
+}
+.capgrid a{
+  display:flex;align-items:center;gap:16px;padding:26px 20px;
+  color:var(--on-surface);font-size:14.5px;
+  border-bottom:1px solid var(--outline-var);
+  transition:background-color var(--d-s4) var(--e-std), color var(--d-s4) var(--e-std);
+}
+.capgrid a:hover{background:var(--surface-1);color:var(--primary)}
+.capgrid svg{width:22px;height:22px;color:var(--on-surface-var);flex:0 0 22px;transition:color var(--d-s4) var(--e-std)}
+.capgrid a:hover svg{color:var(--primary)}
+.capgrid a:nth-child(3n+1){border-right:1px solid var(--outline-var)}
+.capgrid a:nth-child(3n+2){border-right:1px solid var(--outline-var)}
+@media(max-width:760px){
+  .capgrid{grid-template-columns:1fr}
+  .capgrid a{border-right:0!important}
+}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:40px}
+.tool{
+  padding:7px 14px;border-radius:var(--r-full);background:var(--surface-1);color:var(--on-surface-var);
+  font-size:13px;transition:background-color var(--d-s4) var(--e-std),color var(--d-s4) var(--e-std);
+}
+.tool:hover{background:var(--surface-2);color:var(--on-surface)}
+
+/* ==========================================================
+   分頁（Material tabs + 共享軸線指示器）
+   ========================================================== */
+.tabs{
+  position:relative;display:flex;gap:0;border-bottom:1px solid var(--outline);
+  margin-bottom:36px;overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  position:relative;padding:14px 20px;font-size:14px;font-weight:500;color:var(--on-surface-var);
+  white-space:nowrap;
+  transition:color var(--d-s4) var(--e-std),background-color var(--d-s4) var(--e-std);
+}
+.tabs button:hover{color:var(--on-surface);background:var(--surface-1)}
+.tabs button[aria-selected="true"]{color:var(--primary)}
+.tab-ind{
+  position:absolute;bottom:-1px;width:1px;height:3px;border-radius:0 3px 3px 0;background:var(--primary);
+  transform-origin:left center;pointer-events:none;will-change:transform;
+  transition:transform var(--d-m2) var(--e-emph);
+}
+.panels{position:relative}
+.panel{display:none}
+.panel.on{display:block;animation:panel-in var(--d-m1) var(--e-emph-dec) both}
+@keyframes panel-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.psplit{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+@media(max-width:860px){.psplit{grid-template-columns:1fr;gap:24px}}
+.panel h3{font-size:22px;font-weight:400;letter-spacing:-.4px;margin-bottom:12px}
+.panel p.lead{color:var(--on-surface-var);margin-bottom:22px}
+.ticks{list-style:none;display:flex;flex-direction:column;gap:12px}
+.ticks li{display:flex;gap:12px;align-items:flex-start;color:var(--on-surface-var);font-size:14.5px}
+.ticks svg{width:18px;height:18px;color:var(--green);flex:0 0 18px;margin-top:3px}
+.demo-card{
+  border:1px solid var(--outline);border-radius:var(--r-md);padding:22px;background:var(--surface);
+  font-family:var(--mono);font-size:13px;line-height:1.9;color:var(--on-surface-var);
+}
+.demo-card .k{color:var(--on-surface)}
+.demo-card .p{color:var(--primary)}
+.demo-card .g{color:var(--green)}
+.bars{display:flex;flex-direction:column;gap:14px;font-family:var(--font)}
+.bar-row{display:flex;justify-content:space-between;font-size:13px;color:var(--on-surface-var);margin-bottom:6px}
+.bar-track{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.bar-fill{height:6px;border-radius:3px;background:var(--blue);transform-origin:left center;
+  transition:transform var(--d-l2) var(--e-emph-dec)}
+.bar-fill.g{background:var(--green)}
+
+/* ==========================================================
+   對話
+   ========================================================== */
+.chat{max-width:760px;margin:0 auto;border:1px solid var(--outline);border-radius:var(--r-lg);overflow:hidden}
+.chat-head{display:flex;align-items:center;gap:12px;padding:14px 22px;background:var(--surface-1);border-bottom:1px solid var(--outline)}
+.chat-head .who{font-size:14px;font-weight:500}
+.chat-head .st{font-size:12px;color:var(--on-surface-var);display:flex;align-items:center;gap:6px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s var(--e-std) infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+.stream{padding:26px;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:12px;align-items:flex-end;max-width:88%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg .av{width:28px;height:28px;border-radius:50%;flex:0 0 28px;display:grid;place-items:center;font-size:12px;font-weight:500}
+.msg.me .av{background:var(--surface-2);color:var(--on-surface-2)}
+.msg.ai .av{background:var(--primary-container);color:var(--on-primary-container)}
+.bubble{
+  padding:11px 16px;border-radius:18px;font-size:14.5px;
+  background:var(--surface-1);color:var(--on-surface);border:1px solid var(--outline-var);
+}
+.msg.me .bubble{background:var(--primary);color:var(--on-primary);border-color:transparent}
+
+/* ==========================================================
+   常見問題（grid-rows 高度動畫）
+   ========================================================== */
+.faq{max-width:800px;margin:0 auto;border-top:1px solid var(--outline-var)}
+.qa{border-bottom:1px solid var(--outline-var)}
+.qa>button{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:22px 4px;text-align:left;font-size:15.5px;color:var(--on-surface);
+  transition:color var(--d-s4) var(--e-std);
+}
+.qa>button:hover{color:var(--primary)}
+.qa .cv{width:20px;height:20px;color:var(--on-surface-var);flex:0 0 20px;
+  transition:transform var(--d-m1) var(--e-emph), color var(--d-s4) var(--e-std)}
+.qa.open .cv{transform:rotate(180deg);color:var(--primary)}
+.qa .body{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows var(--d-m1) var(--e-emph);
+}
+.qa.open .body{grid-template-rows:1fr}
+.qa .body>div{overflow:hidden}
+.qa .body p{padding:0 40px 22px 4px;color:var(--on-surface-var);font-size:14.5px}
+
+/* ==========================================================
+   結尾
+   ========================================================== */
+.endcard{
+  background:var(--surface-1);border-radius:var(--r-xl);padding:64px 32px;text-align:center;
+}
+.endcard h2{margin-bottom:10px}
+.endcard p{color:var(--on-surface-var);max-width:520px;margin:0 auto 30px}
+
+/* 頁尾 */
+footer{border-top:1px solid var(--outline-var);background:var(--surface-1);margin-top:24px}
+.fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:32px;padding:52px 0 36px}
+.fcols h4{font-size:13px;font-weight:500;color:var(--on-surface);margin-bottom:16px}
+.fcols ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.fcols a{color:var(--on-surface-var);font-size:13.5px;transition:color var(--d-s4) var(--e-std)}
+.fcols a:hover{color:var(--primary)}
+.frow{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:22px 0 40px;border-top:1px solid var(--outline-var);
+  font-size:13px;color:var(--on-surface-var);
+}
+.frow .l{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.frow a{color:var(--on-surface-var)}
+.frow a:hover{color:var(--primary)}
+
+/* 開關 */
+.switch{display:inline-flex;align-items:center;gap:12px;font-size:13.5px;color:var(--on-surface-var)}
+.track{
+  width:48px;height:28px;border-radius:var(--r-full);background:var(--surface-2);
+  border:1px solid var(--outline);position:relative;flex:0 0 48px;
+  transition:background-color var(--d-m1) var(--e-emph), border-color var(--d-m1) var(--e-emph);
+}
+.thumb{
+  position:absolute;top:50%;left:4px;width:16px;height:16px;border-radius:50%;
+  background:var(--on-surface-var);transform:translate(0,-50%);
+  will-change:transform;
+  transition:transform var(--d-m1) var(--e-emph), background-color var(--d-m1) var(--e-emph);
+}
+.switch.on .track{background:var(--primary);border-color:var(--primary)}
+.switch.on .thumb{transform:translate(19px,-50%) scale(1.375);background:var(--on-primary)}
+
+/* FAB */
+.fab{
+  position:fixed;right:20px;bottom:20px;width:52px;height:52px;border-radius:var(--r-lg);
+  background:var(--primary);color:var(--on-primary);display:grid;place-items:center;z-index:55;
+  box-shadow:var(--shadow-2);
+  opacity:0;transform:translateY(12px) scale(.92);pointer-events:none;
+  transition:opacity var(--d-m1) var(--e-emph-dec), transform var(--d-m1) var(--e-emph-dec), background-color var(--d-s4) var(--e-std);
+}
+.fab.show{opacity:1;transform:none;pointer-events:auto}
+.fab:active{transform:scale(.94)}
+
+/* ==========================================================
+   進場動畫 — 只動 opacity / transform，並可交錯延遲
+   ========================================================== */
+.rise{
+  opacity:0;transform:translateY(16px);
+  transition:opacity var(--d-reveal) var(--e-emph-dec), transform var(--d-reveal) var(--e-emph-dec);
+  transition-delay:var(--d,0ms);
+}
+.rise.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important}
+  .rise{opacity:1;transform:none}
+}
+
+/* ==========================================================
+   開場介紹動畫
+   三幕式介紹：Logo 進場 → 描述需求 → 動手完成
+   全程只動 opacity / transform，採 Material fade-through
+   ========================================================== */
+html{scrollbar-gutter:stable}
+.intro{display:none}
+html.intro-run .intro{
+  display:grid;grid-template-rows:1fr auto auto;place-items:center;
+  position:fixed;inset:0;z-index:200;padding:32px 24px;
+  background:var(--surface);
+  will-change:opacity,transform;
+}
+html.intro-run{overflow:hidden}
+html.intro-run body{overflow:hidden}
+
+/* 場景容器：三幕疊在同一位置，逐幕淡入淡出 */
+.scenes{position:relative;width:100%;display:grid;place-items:center;min-height:min(400px,58vh)}
+.scene{
+  position:absolute;inset:0;display:grid;place-content:center;justify-items:center;
+  text-align:center;pointer-events:none;
+  opacity:0;transform:translate3d(0,14px,0) scale(.985);
+}
+/* 第一幕初始可見；務必排在 .on/.out 之前，否則它會蓋掉離場動畫 */
+.scene.auto{opacity:1;transform:none}
+.scene.on{
+  opacity:1;transform:none;
+  transition:opacity .7s var(--e-emph-dec),transform .7s var(--e-emph-dec);
+}
+.scene.out{
+  opacity:0;transform:translate3d(0,-10px,0) scale(1.012);
+  transition:opacity .42s var(--e-emph-acc),transform .42s var(--e-emph-acc);
+}
+
+/* ---------- 第一幕：Logo 逐字進場 ---------- */
+.lockup{display:flex;align-items:baseline;line-height:1;
+  font-size:clamp(46px,11vw,78px);font-weight:500;letter-spacing:-3.5px}
+.ltr{
+  display:inline-block;
+  opacity:0;transform:translate3d(0,24px,0) scale(.86);
+  animation:ltr-in 1.15s var(--e-emph-dec) both;
+  will-change:transform,opacity;
+}
+.scene[data-s="1"] .ltr:nth-child(1){animation-delay:.18s}
+.scene[data-s="1"] .ltr:nth-child(2){animation-delay:.34s}
+.scene[data-s="1"] .ltr:nth-child(3){animation-delay:.50s}
+.scene[data-s="1"] .ltr:nth-child(4){animation-delay:.66s}
+@keyframes ltr-in{to{opacity:1;transform:none}}
+.pro{font-size:.24em;font-weight:400;letter-spacing:0;padding-left:14px;color:var(--on-surface-var);
+  opacity:0;transform:translate3d(0,10px,0);
+  animation:ltr-in .9s var(--e-emph-dec) .86s both}
+.say{margin-top:22px;font-size:14px;color:var(--on-surface-var);letter-spacing:.2px;
+  opacity:0;transform:translate3d(0,10px,0);
+  animation:ltr-in .95s var(--e-emph-dec) 1.06s both}
+
+/* ---------- 第二、三幕共用 ---------- */
+.line{
+  font-size:clamp(24px,5.2vw,38px);font-weight:400;letter-spacing:-1px;line-height:1.3;
+  color:var(--on-surface);
+}
+.line .accent{color:var(--primary)}
+.subline{margin-top:12px;font-size:14px;color:var(--on-surface-var)}
+
+/* 迷你對話（第二幕） */
+.mini{margin-top:30px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.mrow{display:flex;align-items:center;gap:10px;opacity:0;transform:translate3d(0,10px,0)}
+.scene.on .mrow{animation:ltr-in .7s var(--e-emph-dec) both}
+.scene.on .mrow:nth-child(1){animation-delay:.12s}
+.scene.on .mrow:nth-child(2){animation-delay:.62s}
+.scene.on .mrow:nth-child(3){animation-delay:1.12s}
+.mav{width:26px;height:26px;border-radius:50%;flex:0 0 26px;display:grid;place-items:center;
+  font-size:11px;font-weight:500}
+.mav.me{background:var(--surface-2);color:var(--on-surface-2)}
+.mav.ai{background:var(--primary-container);color:var(--on-primary-container)}
+.mb{padding:9px 15px;border-radius:16px;font-size:13.5px;
+  background:var(--surface-1);border:1px solid var(--outline-var);color:var(--on-surface)}
+.mrow.me{align-self:flex-end;flex-direction:row-reverse}
+.mrow.me .mb{background:var(--primary);color:var(--on-primary);border-color:transparent}
+
+/* 能力標籤（第三幕） */
+.pills{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:var(--r-full);font-size:13.5px;
+  background:var(--surface-1);color:var(--on-surface-2);border:1px solid var(--outline-var);
+  opacity:0;transform:translate3d(0,10px,0) scale(.96);
+}
+.scene.on .pill{animation:ltr-in .7s var(--e-emph-dec) both}
+.scene.on .pill:nth-child(1){animation-delay:.12s}
+.scene.on .pill:nth-child(2){animation-delay:.50s}
+.scene.on .pill:nth-child(3){animation-delay:.88s}
+.scene.on .pill:nth-child(4){animation-delay:1.26s}
+.pill svg{width:16px;height:16px;color:var(--green);flex:0 0 16px}
+
+/* ---------- 進度條 ---------- */
+.load{
+  margin-top:34px;width:min(220px,52vw);height:3px;border-radius:2px;
+  background:var(--surface-2);overflow:hidden;
+}
+.load i{
+  display:block;height:100%;border-radius:2px;background:var(--primary);
+  transform:scaleX(0);transform-origin:left center;
+  animation:sweep 7.4s linear .35s both;
+}
+@keyframes sweep{to{transform:scaleX(1)}}
+@keyframes fade-in{to{opacity:1}}
+.skip{
+  margin-top:22px;font-size:12px;color:var(--on-surface-var);
+  opacity:0;animation:fade-in .6s var(--e-std) 2.1s both;
+}
+
+/* ---------- 離場：放大淡出 ---------- */
+html.intro-out .intro{
+  opacity:0;transform:scale3d(1.04,1.04,1);
+  transition:opacity .62s var(--e-emph-acc),transform .78s var(--e-emph-acc);
+}
+/* ---------- 主內容交叉淡入 ---------- */
+html.intro-run .appbar{opacity:0;transform:translate3d(0,-100%,0)}
+html.intro-run .hero>*{opacity:0;transform:translate3d(0,18px,0)}
+html.intro-run .appbar.go{opacity:1;transform:none;
+  transition:opacity .7s var(--e-emph-dec),transform .7s var(--e-emph-dec)}
+html.intro-run .hero.go>*{opacity:1;transform:none;
+  transition:opacity .9s var(--e-emph-dec),transform .9s var(--e-emph-dec)}
+.hero.go>*:nth-child(1){transition-delay:0ms}
+.hero.go>*:nth-child(2){transition-delay:150ms}
+.hero.go>*:nth-child(3){transition-delay:300ms}
+.hero.go>*:nth-child(4){transition-delay:430ms}
+.hero.go>*:nth-child(5){transition-delay:580ms}
+@media (prefers-reduced-motion: reduce){
+  html.intro-run .intro{display:none!important}
+  html.intro-run .hero>*,html.intro-run .appbar{opacity:1!important;transform:none!important}
+}
+</style>
+<script>
+/* 開場介紹動畫排程：在主要內容之前先執行，避免主內容先閃一下 */
+(function(){
+  var d=document.documentElement;
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seen=false;
+  try{ seen=sessionStorage.getItem('jl-intro')==='1'; }catch(e){}
+  if(reduce||seen) return;
+
+  d.classList.add('intro-run');
+  var timers=[], done=false;
+  function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
+
+  function finish(fast){
+    if(done) return; done=true;
+    for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
+    try{ sessionStorage.setItem('jl-intro','1'); }catch(e){}
+    var hero=document.querySelector('.hero');
+    var bar=document.querySelector('.appbar');
+    if(hero) hero.classList.add('go');
+    if(bar) bar.classList.add('go');
+    d.classList.add('intro-out');
+    setTimeout(function(){
+      d.classList.remove('intro-run');
+      d.classList.remove('intro-out');
+      var ov=document.getElementById('intro');
+      if(ov&&ov.parentNode) ov.parentNode.removeChild(ov);
+      /* 開場結束：卸下已進場區塊的 .rise，讓卡片 hover 恢復靈敏 */
+      var done=document.querySelectorAll('.rise.in');
+      for(var k=0;k<done.length;k++){ done[k].classList.remove('rise','in'); }
+    }, (fast?420:620)+700);
+  }
+
+  /* 逐幕切換：先讓當前幕淡出，再把下一幕淡入（Material fade-through） */
+  function switchTo(n, outMs, inMs){
+    var cur=document.querySelector('.scene.on');
+    if(cur){ cur.classList.remove('on'); cur.classList.add('out'); }
+    at(outMs, function(){
+      var nx=document.querySelector('.scene[data-s="'+n+'"]');
+      if(nx){ nx.classList.remove('out'); nx.classList.add('on'); }
+    });
+    return outMs+inMs;
+  }
+
+  /* ---- 時間軸（覺得太快／太慢，改這三個數字就好，單位毫秒）---- */
+  var T={ s1:2200,   /* 第一幕結束、切到第二幕 */
+          s2:5400,   /* 第二幕結束、切到第三幕 */
+          s3:8200 }; /* 第三幕結束、收場進主頁 */
+  at(T.s1, function(){ switchTo(2, 420, 0); });   /* 第二幕：描述需求 */
+  at(T.s2, function(){ switchTo(3, 420, 0); });   /* 第三幕：動手完成 */
+  at(T.s3, function(){ finish(false); });         /* 收場，交叉進主頁 */
+
+  /* ---- 略過 ---- */
+  ['pointerdown','keydown','wheel','touchstart'].forEach(function(ev){
+    window.addEventListener(ev, function(){ finish(true); }, {passive:true, once:true});
+  });
+})();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%231a73e8%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-size=%2718%27 text-anchor=%27middle%27 fill=%27white%27%3E%E9%87%91%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="金龍AI-Pro - 手機上的全能 AI 助理">
+<meta property="og:description" content="會思考，也能動手：執行指令、讀寫檔案、控制裝置、定時跑任務。">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="scenes">
+
+    <section class="scene auto on" data-s="1">
+      <div>
+        <div class="lockup">
+          <span class="ltr w1">金</span><span class="ltr w2">龍</span><span class="ltr w3">A</span><span class="ltr w4">I</span>
+          <span class="pro">-Pro</span>
+        </div>
+        <div class="say">手機上的全能 AI 助理</div>
+      </div>
+    </section>
+
+    <section class="scene" data-s="2">
+      <div>
+        <div class="line">描述你要做的事<span class="accent">，</span></div>
+        <div class="subline">用平常講話的方式就好</div>
+        <div class="mini">
+          <div class="mrow me"><span class="mav me">你</span><span class="mb">幫我把這份月報整理成圖表</span></div>
+          <div class="mrow"><span class="mav ai">龍</span><span class="mb">好的，先讀取欄位再分組彙總</span></div>
+          <div class="mrow"><span class="mav ai">龍</span><span class="mb">完成，圖表已輸出並開好連結</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" data-s="3">
+      <div>
+        <div class="line">它會<span class="accent">真的做完</span></div>
+        <div class="subline">不只是回答問題</div>
+        <div class="pills">
+          <span class="pill"><svg><use href="#i-check"/></svg>執行指令</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>操作檔案</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>跑程式</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>開服務</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <div class="load"><i></i></div>
+  <div class="skip">點一下略過</div>
+</div>
+
+<svg style="display:none" aria-hidden="true">
+  <defs>
+    <g id="g-stroke" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8 20.5 20.5"/></g></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9.5" y="3" width="5" height="10.5" rx="2.5"/><path d="M6 11.5a6 6 0 0 0 12 0"/><path d="M12 17.5V21"/></g></symbol>
+  <symbol id="i-lens" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><circle cx="12" cy="12.5" r="3.4"/><path d="M8.6 6 9.9 4h4.2l1.3 2"/></g></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="6" cy="6" r="1.7"/><circle cx="12" cy="6" r="1.7"/><circle cx="18" cy="6" r="1.7"/><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/><circle cx="6" cy="18" r="1.7"/><circle cx="12" cy="18" r="1.7"/><circle cx="18" cy="18" r="1.7"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 13.6A8.1 8.1 0 0 1 10.4 4a8.1 8.1 0 1 0 9.6 9.6Z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.5V5.5"/><path d="M6 11.5l6-6 6 6"/></g></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.6 4.6L19 7.3"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13.5"/><path d="M13 6.5l5.5 5.5L13 17.5"/></g></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4.5 5.5h15v11h-9l-6 4.2V5.5Z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M13 3.5 5.5 13.5H11L10.5 20.5l8-10.5H13l0-6.5Z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 7a2 2 0 0 1 2-2h3.6l1.9 2h7.5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7Z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2.6"/><path d="M10.8 18.2h2.4"/></g></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5.5" width="16" height="15" rx="2.4"/><path d="M8 3.5v4M16 3.5v4M4 10.5h16"/></g></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/></g></symbol>
+  <symbol id="i-layer" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.8 20 8.2l-8 4.4-8-4.4 8-4.4Z"/><path d="M4 13.2l8 4.4 8-4.4"/></g></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.4"/><circle cx="9" cy="10" r="1.5"/><path d="M4.2 17.2 9 13.2l3.6 2.8 3-2.4 4.2 3.4"/></g></symbol>
+  <symbol id="i-lang" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5h7M6.5 3.5v3c0 4-1.4 7-3.5 9"/><path d="M5.5 12.2c1.4 2.4 3.3 3.9 5.5 4.8"/><path d="M12.5 20.5 16 11l3.5 9.5"/><path d="M13.8 16.8h4.4"/></g></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4l1.9 5.1L19 11l-5.1 1.9L12 18l-1.9-5.1L5 11l5.1-1.9L12 4Z"/></symbol>
+</svg>
+
+<header class="appbar" id="appbar">
+  <div class="bar">
+    <a class="brand" href="#top">
+      <span class="wordmark"><i class="w1">金</i><i class="w2">龍</i><i class="w3">A</i><i class="w4">I</i><small>-Pro</small></span>
+    </a>
+    <nav class="main" id="nav" aria-label="主要導覽">
+      <a href="#why">為什麼</a>
+      <a href="#ability">能力</a>
+      <a href="#usecase">應用</a>
+      <a href="#demo">示範</a>
+      <a href="#faq">說明</a>
+      <span class="ind" id="navInd"></span>
+    </nav>
+    <span class="grow"></span>
+    <button class="iconbtn rip-host" id="themeBtn" aria-label="切換深色模式"><svg width="20" height="20"><use href="#i-moon"/></svg></button>
+    <button class="iconbtn rip-host" id="sheetBtn" aria-label="更多功能"><svg width="20" height="20"><use href="#i-grid"/></svg></button>
+    <button class="iconbtn rip-host menubtn" id="menuBtn" aria-label="選單"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <div class="avatar rip-host" aria-hidden="true">龍</div>
+
+    <div class="sheet" id="sheet">
+      <div class="title">金龍AI 功能</div>
+      <div class="grid">
+        <a href="#ability"><svg><use href="#i-spark"/></svg>對話推理</a>
+        <a href="#ability"><svg><use href="#i-bolt"/></svg>執行指令</a>
+        <a href="#ability"><svg><use href="#i-folder"/></svg>檔案操作</a>
+        <a href="#ability"><svg><use href="#i-phone"/></svg>裝置控制</a>
+        <a href="#usecase"><svg><use href="#i-cal"/></svg>定時任務</a>
+        <a href="#usecase"><svg><use href="#i-globe"/></svg>發布上網</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ===== 首屏 ===== -->
+  <div class="hero">
+    <h1 class="mark">
+      <i class="w1">金</i><i class="w2">龍</i><i class="w3">A</i><i class="w4">I</i><small>-Pro</small>
+    </h1>
+    <p class="tagline">手機上的全能 AI 助理，不只回答問題，還會真的把事情做完。</p>
+
+    <div class="searchbar">
+      <span class="sbico"><svg><use href="#i-search"/></svg></span>
+      <input id="q" type="text" placeholder="描述你想完成的事" aria-label="搜尋能力">
+      <span class="sbsep"></span>
+      <span class="sbico btn" title="語音輸入"><svg><use href="#i-mic"/></svg></span>
+      <span class="sbico btn" title="以圖搜尋"><svg><use href="#i-lens"/></svg></span>
+    </div>
+    <div class="hint" id="hint"></div>
+
+    <div class="actions">
+      <a class="btn filled rip-host" href="#ability">開始使用</a>
+      <a class="btn quiet rip-host" href="#demo">看示範</a>
+    </div>
+  </div>
+
+  <!-- ===== 為什麼 ===== -->
+  <section id="why">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="eyebrow">Why</div>
+        <h2>把對話變成結果</h2>
+        <p>一般助理給你建議；金龍AI-Pro 直接動手 —— 執行指令、操作檔案、跑程式、開服務。</p>
+      </div>
+      <div class="cards" id="cards">
+        <div class="card rise" style="--d:0ms">
+          <svg class="ic"><use href="#i-chat"/></svg>
+          <h3>自然對話</h3>
+          <p>用中文描述需求就能運作，複雜任務會自動拆解成步驟，模糊之處會先問清楚。</p>
+          <a class="go" href="#demo">看示範<svg><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="card rise" style="--d:140ms">
+          <svg class="ic"><use href="#i-bolt"/></svg>
+          <h3>真實執行</h3>
+          <p>內建完整 Linux 環境，Python、Node、Git、SQLite 隨手可用，寫完就能跑。</p>
+          <a class="go" href="#ability">看能力<svg><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="card rise" style="--d:280ms">
+          <svg class="ic"><use href="#i-cal"/></svg>
+          <h3>按時完成</h3>
+          <p>一句 cron 表達式安排每日簡報、資料抓取、例行巡檢，時間到自動執行。</p>
+          <a class="go" href="#usecase">看場景<svg><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="card rise" style="--d:420ms">
+          <svg class="ic"><use href="#i-phone"/></svg>
+          <h3>留在本機</h3>
+          <p>檔案與執行環境都在你自己的裝置上；敏感操作會先說明再執行。</p>
+          <a class="go" href="#faq">看說明<svg><use href="#i-arrow"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 能力 ===== -->
+  <section id="ability">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="eyebrow">Capabilities</div>
+        <h2>一個對話視窗，九種能力</h2>
+      </div>
+      <div class="capgrid rise">
+        <a href="#demo"><svg><use href="#i-spark"/></svg>對話與推理</a>
+        <a href="#demo"><svg><use href="#i-bolt"/></svg>Shell 指令執行</a>
+        <a href="#demo"><svg><use href="#i-folder"/></svg>檔案讀寫與搜尋</a>
+        <a href="#demo"><svg><use href="#i-phone"/></svg>裝置控制</a>
+        <a href="#demo"><svg><use href="#i-cal"/></svg>定時任務</a>
+        <a href="#demo"><svg><use href="#i-globe"/></svg>公網發布</a>
+        <a href="#demo"><svg><use href="#i-layer"/></svg>技能與記憶</a>
+        <a href="#demo"><svg><use href="#i-image"/></svg>圖片與文件處理</a>
+        <a href="#demo"><svg><use href="#i-lang"/></svg>多語支援</a>
+      </div>
+      <div class="tools rise" style="--d:180ms">
+        <span class="tool">Python</span><span class="tool">Node</span><span class="tool">Git</span>
+        <span class="tool">curl</span><span class="tool">SQLite3</span><span class="tool">Redis</span>
+        <span class="tool">PHP</span><span class="tool">make</span><span class="tool">OpenSSL</span>
+        <span class="tool">tmux</span><span class="tool">jq</span><span class="tool">rg</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 應用場景 ===== -->
+  <section id="usecase">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="eyebrow">Use cases</div>
+        <h2>它能幫你做完這些事</h2>
+      </div>
+
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" aria-selected="true" data-p="p1">寫程式</button>
+        <button role="tab" aria-selected="false" data-p="p2">整理資料</button>
+        <button role="tab" aria-selected="false" data-p="p3">架網站</button>
+        <button role="tab" aria-selected="false" data-p="p4">自動化排程</button>
+        <span class="tab-ind" id="tabInd" ></span>
+      </div>
+
+      <div class="panels rise">
+        <div class="panel on" id="p1">
+          <div class="psplit">
+            <div>
+              <h3>描述需求，直接產出可執行的程式</h3>
+              <p class="lead">不必來回貼錯誤訊息 —— 程式生成後就在同一台裝置上執行、看輸出、修正，直到跑通。</p>
+              <ul class="ticks">
+                <li><svg><use href="#i-check"/></svg>依需求生成 Python / Node / Shell 腳本</li>
+                <li><svg><use href="#i-check"/></svg>當場執行、讀取錯誤、自動修正</li>
+                <li><svg><use href="#i-check"/></svg>重構既有檔案、補上測試</li>
+              </ul>
+            </div>
+            <div class="demo-card">
+              <div class="k">$ 統計台北市 YouBike 站點數量</div>
+              <div class="p">→ 產生 bike.py，執行中…</div>
+              <div>→ 讀取資料 1,284 筆</div>
+              <div class="g">→ 完成，已輸出 result.csv</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="p2">
+          <div class="psplit">
+            <div>
+              <h3>雜亂檔案丟進來，輸出乾淨報表</h3>
+              <p class="lead">CSV、JSON、Excel 混在一起也不用先整理：清理、彙總、算成長率、畫圖表，一次做完。</p>
+              <ul class="ticks">
+                <li><svg><use href="#i-check"/></svg>批次清理、欄位對齊、去除重複</li>
+                <li><svg><use href="#i-check"/></svg>多檔合併與樞紐彙總</li>
+                <li><svg><use href="#i-check"/></svg>輸出圖表或互動式網頁</li>
+              </ul>
+            </div>
+            <div class="demo-card bars">
+              <div>
+                <div class="bar-row"><span>處理前</span><span>14 個檔案</span></div>
+                <div class="bar-track"><div class="bar-fill" style="transform:scaleX(1)"></div></div>
+              </div>
+              <div>
+                <div class="bar-row"><span>處理後</span><span>1 份報表</span></div>
+                <div class="bar-track"><div class="bar-fill g" style="transform:scaleX(.18)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="p3">
+          <div class="psplit">
+            <div>
+              <h3>從零到上線，都在同一個對話裡</h3>
+              <p class="lead">生成靜態網站或小型 API，開好連接埠、實測連線，需要分享時再取得公網連結。</p>
+              <ul class="ticks">
+                <li><svg><use href="#i-check"/></svg>產生完整 HTML / CSS / JS</li>
+                <li><svg><use href="#i-check"/></svg>本機啟動並驗證 HTTP 回應</li>
+                <li><svg><use href="#i-check"/></svg>需要時掛上公網連結</li>
+              </ul>
+            </div>
+            <div class="demo-card">
+              <div>本機服務</div>
+              <div class="g">HTTP 200 · 41,084 bytes</div>
+              <div style="margin-top:10px">公網連結</div>
+              <div class="p" style="word-break:break-all">https://••••••.serveousercontent.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="p4">
+          <div class="psplit">
+            <div>
+              <h3>一句 cron，每天自動做完</h3>
+              <p class="lead">早上醒來，簡報已整理好、資料已抓好、檢查已跑過。</p>
+              <ul class="ticks">
+                <li><svg><use href="#i-check"/></svg>每日情報彙整與摘要</li>
+                <li><svg><use href="#i-check"/></svg>定時抓取資料並存檔</li>
+                <li><svg><use href="#i-check"/></svg>例行巡檢、備份、清理</li>
+              </ul>
+            </div>
+            <div class="demo-card">
+              <div># 每天早上 7 點</div>
+              <div class="p">0 7 * * *</div>
+              <div style="margin-top:10px">→ 彙整昨日資料、產生摘要、寫入 report.md</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 示範 ===== -->
+  <section id="demo">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="eyebrow">Demo</div>
+        <h2>對話長什麼樣子</h2>
+      </div>
+      <div class="chat rise">
+        <div class="chat-head">
+          <div class="msg ai" style="max-width:none"><div class="av">龍</div></div>
+          <div>
+            <div class="who">金龍AI-Pro</div>
+            <div class="st"><span class="pulse"></span>執行環境就緒</div>
+          </div>
+        </div>
+        <div class="stream">
+          <div class="msg me"><div class="av">你</div><div class="bubble">幫我把這份 CSV 統計一下，各門市每月營業額，做成網頁圖表。</div></div>
+          <div class="msg ai"><div class="av">龍</div><div class="bubble">好的。我先讀取檔案確認欄位格式，再用 Python 分組彙總，生成帶圖表的 HTML，開在本機 8080 埠並給你連結。需要加上環比成長率嗎？</div></div>
+          <div class="msg me"><div class="av">你</div><div class="bubble">要，順便掛上公網我傳給主管看。</div></div>
+          <div class="msg ai"><div class="av">龍</div><div class="bubble">完成。已加上環比成長率與紅綠標示，公網連結如下（臨時有效，服務關閉即失效）。</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 說明 ===== -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="eyebrow">FAQ</div>
+        <h2>常見問題</h2>
+      </div>
+      <div class="faq rise" id="faqList">
+        <div class="qa open">
+          <button class="rip-host">跟一般聊天機器人有什麼不同？<svg class="cv"><use href="#i-chev"/></svg></button>
+          <div class="body"><div><p>它不只給建議，而是直接動手：執行指令、操作檔案、跑程式、開服務。你要的是結果，不是一段說明。</p></div></div>
+        </div>
+        <div class="qa">
+          <button class="rip-host">需要會寫程式才能用嗎？<svg class="cv"><use href="#i-chev"/></svg></button>
+          <div class="body"><div><p>不需要。用平常講話的方式描述你要什麼就好；懂技術的人也可以直接下命令列指令。</p></div></div>
+        </div>
+        <div class="qa">
+          <button class="rip-host">我的資料會上傳到哪裡？<svg class="cv"><use href="#i-chev"/></svg></button>
+          <div class="body"><div><p>檔案與執行環境都在你自己的裝置上，程式在本機執行。涉及刪除或變更系統設定的操作，動手前會先說明並等你同意。</p></div></div>
+        </div>
+        <div class="qa">
+          <button class="rip-host">可以一直掛在網路上讓別人用嗎？<svg class="cv"><use href="#i-chev"/></svg></button>
+          <div class="body"><div><p>臨時分享可以。公網連結屬於臨時性質，會隨服務結束或裝置離線失效，不適合作為長期主機。</p></div></div>
+        </div>
+        <div class="qa">
+          <button class="rip-host">支援哪些語言？<svg class="cv"><use href="#i-chev"/></svg></button>
+          <div class="body"><div><p>預設以繁體中文回應；你用什麼語言提問就會切換到該語言，程式碼與指令保持原文。</p></div></div>
+        </div>
+      </div>
+
+      <div class="cards" style="margin-top:28px;max-width:800px;margin-left:auto;margin-right:auto">
+        <div class="card rise" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:22px 26px">
+          <div>
+            <h3 style="margin-bottom:4px">深色模式</h3>
+            <p style="font-size:13.5px">跟隨 Google 深色主題配色。</p>
+          </div>
+          <button class="switch" id="sw" aria-label="切換深色模式">
+            <span class="track"><span class="thumb"></span></span>
+            <span id="swLabel">淺色</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 結尾 ===== -->
+  <section>
+    <div class="wrap">
+      <div class="endcard rise">
+        <h2>把想法說出來就好</h2>
+        <p>不用學新工具、不用設定環境。打開對話，描述你要完成的事。</p>
+        <div class="actions" style="margin-top:0">
+          <a class="btn filled rip-host" href="#top">回到頂部</a>
+          <a class="btn outlined rip-host" href="#faq">還有疑問</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fcols">
+      <div>
+        <h4>產品</h4>
+        <ul>
+          <li><a href="#ability">核心能力</a></li>
+          <li><a href="#usecase">應用場景</a></li>
+          <li><a href="#demo">對話示範</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>工具箱</h4>
+        <ul>
+          <li><a href="#ability">Python / Node</a></li>
+          <li><a href="#ability">Git / curl</a></li>
+          <li><a href="#ability">SQLite / Redis</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>說明</h4>
+        <ul>
+          <li><a href="#faq">常見問題</a></li>
+          <li><a href="#why">運作方式</a></li>
+          <li><a href="#top">回到首頁</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>語言</h4>
+        <ul>
+          <li><a href="#top">繁體中文</a></li>
+          <li><a href="#top">简体中文</a></li>
+          <li><a href="#top">English</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="l">
+        <span>© <span id="year"></span> 金龍AI-Pro</span>
+        <a href="#faq">隱私權</a>
+        <a href="#faq">條款</a>
+      </div>
+      <div class="l"><span>介面樣式參考 Material Design</span></div>
+    </div>
+  </div>
+</footer>
+
+<button class="fab rip-host" id="fab" aria-label="回到頂部"><svg width="22" height="22"><use href="#i-up"/></svg></button>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.getElementById('year').textContent=new Date().getFullYear();
+
+  /* ---------- 漣漪：短、淡、不干擾 ---------- */
+  if(!reduce){
+    document.addEventListener('pointerdown',function(e){
+      var host=e.target.closest('.rip-host');
+      if(!host) return;
+      var r=host.getBoundingClientRect();
+      var size=Math.max(r.width,r.height);
+      var s=document.createElement('span');
+      s.className='rip';
+      s.style.width=s.style.height=size+'px';
+      s.style.left=(e.clientX-r.left-size/2)+'px';
+      s.style.top=(e.clientY-r.top-size/2)+'px';
+      host.appendChild(s);
+      s.addEventListener('animationend',function(){ s.remove(); });
+    },{passive:true});
+  }
+
+  /* ---------- 頂部列陰影 + FAB ---------- */
+  var bar=document.getElementById('appbar'), fab=document.getElementById('fab'), ticking=false;
+  function onScroll(){
+    if(ticking) return;
+    ticking=true;
+    requestAnimationFrame(function(){
+      var y=window.pageYOffset;
+      bar.classList.toggle('stuck', y>2);
+      fab.classList.toggle('show', y>520);
+      ticking=false;
+    });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+  fab.addEventListener('click',function(){ window.scrollTo({top:0,behavior:reduce?'auto':'smooth'}); });
+
+  /* ---------- 九宮格面板 ---------- */
+  var sheet=document.getElementById('sheet');
+  document.getElementById('sheetBtn').addEventListener('click',function(e){
+    e.stopPropagation(); sheet.classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!sheet.contains(e.target)) sheet.classList.remove('open');
+  });
+
+  /* ---------- 深色模式 ---------- */
+  var sw=document.getElementById('sw'), swLabel=document.getElementById('swLabel');
+  function setTheme(t){
+    root.setAttribute('data-theme',t);
+    var dark=(t==='dark');
+    sw.classList.toggle('on',dark);
+    swLabel.textContent=dark?'深色':'淺色';
+    document.getElementById('themeBtn').style.color = dark? 'var(--primary)':'';
+    try{ localStorage.setItem('jl-theme',t); }catch(err){}
+  }
+  var saved=null;
+  try{ saved=localStorage.getItem('jl-theme'); }catch(err){}
+  if(!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) saved='dark';
+  setTheme(saved==='dark'?'dark':'light');
+  function toggle(){ setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'); }
+  document.getElementById('themeBtn').addEventListener('click',toggle);
+  sw.addEventListener('click',toggle);
+
+  /* ---------- 導覽底線指示器（單一元素平移）---------- */
+  var nav=document.getElementById('nav'), navInd=document.getElementById('navInd');
+  var links=Array.prototype.slice.call(nav.querySelectorAll('a'));
+  function moveInd(el){
+    if(!el){ navInd.classList.remove('show'); return; }
+    var nr=nav.getBoundingClientRect(), r=el.getBoundingClientRect();
+    navInd.style.transform='translateX('+(r.left-nr.left+16)+'px) scaleX('+(r.width-32)+')';
+    navInd.classList.add('show');
+  }
+  var activeLink=null;
+  function setActive(el){ activeLink=el; links.forEach(function(a){ a.classList.toggle('on',a===el); }); moveInd(el); }
+  links.forEach(function(a){ a.addEventListener('mouseenter',function(){ moveInd(a); }); });
+  nav.addEventListener('mouseleave',function(){ moveInd(activeLink); });
+
+  /* ---------- 區塊偵測：導覽高亮 ---------- */
+  var secs=links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  if('IntersectionObserver' in window){
+    var navIO=new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var i=secs.indexOf(en.target);
+        if(i>=0) setActive(links[i]);
+      });
+    },{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(s){ if(s) navIO.observe(s); });
+  }
+
+  /* ---------- 分頁：共享軸線指示器 + 淡入 ---------- */
+  var tabs=document.getElementById('tabs'), tabInd=document.getElementById('tabInd');
+  var tbtns=Array.prototype.slice.call(tabs.querySelectorAll('button'));
+  function moveTabInd(b){
+    var tr=tabs.getBoundingClientRect(), r=b.getBoundingClientRect();
+    tabInd.style.transform='translateX('+(r.left-tr.left+tabs.scrollLeft)+'px) scaleX('+r.width+')';
+  }
+  tabs.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    tbtns.forEach(function(x){ x.setAttribute('aria-selected','false'); });
+    b.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('on'); });
+    var t=document.getElementById(b.dataset.p);
+    if(t){ void t.offsetWidth; t.classList.add('on'); }
+    moveTabInd(b);
+  });
+  function initTabs(){ moveTabInd(tabs.querySelector('button[aria-selected="true"]')); }
+  initTabs();
+  window.addEventListener('resize',function(){ initTabs(); moveInd(activeLink); });
+
+  /* ---------- 常見問題：grid-template-rows 平滑展開 ---------- */
+  document.querySelectorAll('#faqList .qa').forEach(function(qa){
+    qa.querySelector('button').addEventListener('click',function(){
+      qa.classList.toggle('open');
+    });
+  });
+
+  /* ---------- 進場動畫：只做一次 ---------- */
+  var rises=document.querySelectorAll('.rise');
+  if('IntersectionObserver' in window && !reduce){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var el=en.target;
+        el.classList.add('in');
+        io.unobserve(el);
+        /* 進場演完就把 .rise 卸下：否則 .rise 的 transition 會一直蓋掉
+           .card 自己的 hover 過渡（陰影瞬變、位移變遲鈍） */
+        var delay=parseFloat(getComputedStyle(el).transitionDelay)||0;
+        setTimeout(function(){
+          /* 交叉淡入期間（intro-run）先不卸，避免第一屏閃動 */
+          if(document.documentElement.classList.contains('intro-run')) return;
+          el.classList.remove('rise','in');
+        }, delay*1000+820);
+      });
+    },{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+    rises.forEach(function(el){ io.observe(el); });
+  }else{
+    rises.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  /* ---------- 首頁搜尋：即時篩選（不跳版）---------- */
+  var q=document.getElementById('q'), hint=document.getElementById('hint');
+  var cards=Array.prototype.slice.call(document.querySelectorAll('#cards .card'));
+  var map={'寫程式':['程式','指令','shell'],'整理資料':['檔案','資料','報表'],
+           '架網站':['網站','公網','html'],'排程':['定時','任務','cron'],'檔案':['檔案','讀寫']};
+  function runFilter(raw){
+    var txt=(raw||'').trim();
+    if(!txt){ cards.forEach(function(c){ c.classList.remove('fade'); }); hint.classList.remove('on'); return; }
+    var key=null;
+    Object.keys(map).forEach(function(k){ if(txt.indexOf(k)>=0) key=k; });
+    var hit=false;
+    cards.forEach(function(c){
+      var m=(c.textContent.indexOf(txt)>=0) || (key && map[key].some(function(w){ return c.textContent.indexOf(w)>=0; }));
+      c.classList.toggle('fade',!m);
+      if(m) hit=true;
+    });
+    if(!hit) cards.forEach(function(c){ c.classList.remove('fade'); });
+    hint.textContent = hit ? '已篩選相關能力 ↓' : '找不到符合的能力，顯示全部';
+    hint.classList.add('on');
+  }
+  var t=null;
+  q.addEventListener('input',function(){
+    if(reduce){ runFilter(q.value); return; }
+    clearTimeout(t);
+    t=setTimeout(function(){ runFilter(q.value); },120);
+  });
+  q.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      e.preventDefault(); q.blur();
+      document.getElementById('ability').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }
+  });
+})();
+</script>
+</body>
+</html>
