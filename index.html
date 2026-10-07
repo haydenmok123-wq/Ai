@@ -478,18 +478,43 @@ html.intro-run body{overflow:hidden}
 @keyframes g1-cloud-in{to{stroke-dashoffset:0}}
 @keyframes g1-cloud-out{to{opacity:0;transform:scale(.7)}}
 
-/* ② 線：一筆畫成龍形簡筆（沿用 AVD 的 trimPath 描邊做法） */
-.g1-art{fill:none;stroke-width:4.2;stroke-linecap:round;stroke-linejoin:round}
-.g1-art path{stroke-dasharray:100;stroke-dashoffset:100;
-  animation:g1-draw-line .9s var(--e-emph-dec) both}
-.g1-art .d1{stroke:#4285F4;animation-delay:.86s}                 /* 龍身，主筆 */
-.g1-art .d2{stroke:#FBBC05;animation-delay:1.66s;
-  animation-duration:.24s}                                       /* 龍角 */
-.g1-art .d3{fill:#EA4335;stroke:none;opacity:0;
-  transform-origin:43.6px 25.6px;
-  animation:g1-dot .26s var(--e-emph-dec) 1.80s both}            /* 龍眼 */
-@keyframes g1-draw-line{to{stroke-dashoffset:0}}
-@keyframes g1-dot{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:scale(1)}}
+/* ② 一條線：鏡頭跟著線，把「龍」字畫出來（字形取自系統 Noto Sans CJK）*/
+.ld-out,.ld-fill{stroke-linejoin:round;stroke-linecap:round}
+.ld-out{fill:none;stroke:#4285F4;stroke-width:4;
+  stroke-dasharray:100;stroke-dashoffset:100;
+  animation:ld-line 2.4s linear .85s both}
+@keyframes ld-line{to{stroke-dashoffset:0}}
+.ld-fill{fill:var(--on-surface);stroke:none;opacity:0;
+  animation:ld-fill-in .45s var(--e-emph-dec) 3.25s both}
+@keyframes ld-fill-in{to{opacity:1}}
+.g1-cam{transform-box:view-box;transform-origin:50px 50px;
+  animation:ld-cam 2.4s linear .85s both}
+@keyframes ld-cam{
+  0%{transform:translate(65.5px,68.6px) scale(1.700)}
+  5%{transform:translate(51.6px,61.9px) scale(1.604)}
+  10%{transform:translate(35.8px,49.8px) scale(1.519)}
+  15%{transform:translate(14.0px,43.0px) scale(1.442)}
+  20%{transform:translate(-7.4px,41.2px) scale(1.372)}
+  25%{transform:translate(-18.1px,40.2px) scale(1.307)}
+  30%{transform:translate(-21.9px,22.2px) scale(1.247)}
+  35%{transform:translate(-25.0px,9.0px) scale(1.193)}
+  40%{transform:translate(-20.9px,-1.9px) scale(1.143)}
+  45%{transform:translate(-13.8px,-15.6px) scale(1.099)}
+  50%{transform:translate(-12.3px,-25.3px) scale(1.059)}
+  55%{transform:translate(-9.9px,-17.7px) scale(1.025)}
+  60%{transform:translate(-3.0px,-17.1px) scale(0.995)}
+  65%{transform:translate(6.5px,-17.8px) scale(0.971)}
+  70%{transform:translate(14.9px,-16.3px) scale(0.952)}
+  75%{transform:translate(24.6px,-17.8px) scale(0.940)}
+  80%{transform:translate(29.3px,-18.2px) scale(0.933)}
+  85%{transform:translate(35.8px,-8.4px) scale(0.934)}
+  90%{transform:translate(37.8px,-0.1px) scale(0.943)}
+  95%{transform:translate(39.6px,3.4px) scale(0.963)}
+  100%{transform:translate(40.2px,9.3px) scale(1.000)}
+}
+.g1-shrink{transform-box:view-box;transform-origin:32px 32px;
+  animation:ld-shrink .6s var(--e-emph) 3.35s both}
+@keyframes ld-shrink{from{transform:scale(1)}to{transform:scale(.64)}}
 
 /* ③ 四色環：順時針繞上（綠 → 黃 → 紅 → 藍） */
 .g1-ring{transform-origin:32px 32px;
@@ -618,7 +643,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   var d=document.documentElement;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var seen=false;
-  try{ seen=sessionStorage.getItem('jl-intro-v5')==='1'; }catch(e){}
+  try{ seen=sessionStorage.getItem('jl-intro-v6')==='1'; }catch(e){}
   if(reduce||seen) return;
 
   d.classList.add('intro-run');
@@ -628,7 +653,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   function finish(fast){
     if(done) return; done=true;
     for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
-    try{ sessionStorage.setItem('jl-intro-v5','1'); }catch(e){}
+    try{ sessionStorage.setItem('jl-intro-v6','1'); }catch(e){}
     var hero=document.querySelector('.hero');
     var bar=document.querySelector('.appbar');
     if(hero) hero.classList.add('go');
@@ -646,11 +671,11 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   }
 
   /* ---- 時間軸（單位毫秒，要調整改這一組）---- */
-  var T={ logo:4200,    /* ① 雲→龍→四色環 播完，開始收掉標誌 */
-          s2:4600,      /* ② 第二幕「描述你要做的事」進場 */
-          s3:7700,      /* ③ 第二幕退場、第三幕準備 */
-          s3in:8120,    /*    第三幕「它會真的做完」進場 */
-          end:10900 };  /* ④ 收場，交叉進主頁 */
+  var T={ logo:6100,    /* ① 雲→線畫「龍」→縮小→四色環 播完，開始收掉標誌 */
+          s2:6400,      /* ② 第二幕「描述你要做的事」進場 */
+          s3:9500,      /* ③ 第二幕退場、第三幕準備 */
+          s3in:9920,    /*    第三幕「它會真的做完」進場 */
+          end:12600 };  /* ④ 收場，交叉進主頁 */
   at(T.logo, function(){
     var g=document.querySelector('.g1');
     if(g) g.classList.add('gone');
@@ -683,11 +708,13 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
     <svg class="g1-mark" viewBox="0 0 64 64" aria-hidden="true">
       <path class="g1-cloud" pathLength="100"
             d="M18,44 a8,8 0 0 1 2.2,-15.6 a10.5,10.5 0 0 1 19.3,-2.9 a7.5,7.5 0 0 1 6.5,18.5 z"/>
-      <g class="g1-art">
-        <path class="d1" pathLength="100"
-              d="M16,45 C22,47 27,40 24,35 C21,30 29,26 34,30 C39,34 44,30 45,23"/>
-        <path class="d2" pathLength="100" d="M45,23 L47.5,18"/>
-        <circle class="d3" cx="43.6" cy="25.6" r="1.4"/>
+      <g class="g1-shrink">
+        <g transform="translate(7,7) scale(0.5)">
+          <g class="g1-cam">
+            <path class="ld-out" pathLength="100" d="M1.8 9.4V16.3H47.8V9.4ZM8.4 18C10.2 22.4 12 28.3 12.5 32L19.3 30.2C18.7 26.5 16.8 20.8 15 16.5ZM20.7 0V13.4H28.6V0ZM34.8 16.2C33.9 20.3 31.7 26.3 30.1 30.2L36.4 31.9C38.1 28.2 40.1 23 42.2 18ZM55.3 24.2V30.6H85.9V40.3H55.3V46.7H93.7V24.2ZM58.5 8.5V15.3H98V8.5ZM55.3 0V28.2H63.2V0ZM55.3 43.9V87.6C55.3 96.7 58.4 98.7 68.6 98.7C70.8 98.7 86.3 98.7 88.6 98.7C96.8 98.7 99 95.8 100 85.9C97.8 85.4 94.7 84.3 93 83.1C92.6 90.4 91.8 91.8 88 91.8C84.9 91.8 71.8 91.8 69.5 91.8C64.2 91.8 63.3 91 63.3 87.5V43.8ZM58.3 77.6V82.8H94.1V77.6ZM58.9 65.3V70.7H93V65.3ZM58.6 53.3V58.6H93.6V53.3ZM36.7 45.6V90.3C36.7 91.6 36.4 91.9 35.1 92C33.8 92.1 29.8 92.1 25.2 91.9C26.3 94 27.5 97.1 27.9 99.2C34.1 99.2 38.4 99.1 41.3 98C44 96.7 44.8 94.4 44.8 90.5V45.7ZM9.1 72.9V78.6H40.6V72.9ZM9.1 59.3V65H40.6V59.3ZM5.9 45.6V99H13.5V51.8H40.9V45.6ZM0 31.7V38.7H49.6V31.7Z"/>
+            <path class="ld-fill" d="M1.8 9.4V16.3H47.8V9.4ZM8.4 18C10.2 22.4 12 28.3 12.5 32L19.3 30.2C18.7 26.5 16.8 20.8 15 16.5ZM20.7 0V13.4H28.6V0ZM34.8 16.2C33.9 20.3 31.7 26.3 30.1 30.2L36.4 31.9C38.1 28.2 40.1 23 42.2 18ZM55.3 24.2V30.6H85.9V40.3H55.3V46.7H93.7V24.2ZM58.5 8.5V15.3H98V8.5ZM55.3 0V28.2H63.2V0ZM55.3 43.9V87.6C55.3 96.7 58.4 98.7 68.6 98.7C70.8 98.7 86.3 98.7 88.6 98.7C96.8 98.7 99 95.8 100 85.9C97.8 85.4 94.7 84.3 93 83.1C92.6 90.4 91.8 91.8 88 91.8C84.9 91.8 71.8 91.8 69.5 91.8C64.2 91.8 63.3 91 63.3 87.5V43.8ZM58.3 77.6V82.8H94.1V77.6ZM58.9 65.3V70.7H93V65.3ZM58.6 53.3V58.6H93.6V53.3ZM36.7 45.6V90.3C36.7 91.6 36.4 91.9 35.1 92C33.8 92.1 29.8 92.1 25.2 91.9C26.3 94 27.5 97.1 27.9 99.2C34.1 99.2 38.4 99.1 41.3 98C44 96.7 44.8 94.4 44.8 90.5V45.7ZM9.1 72.9V78.6H40.6V72.9ZM9.1 59.3V65H40.6V59.3ZM5.9 45.6V99H13.5V51.8H40.9V45.6ZM0 31.7V38.7H49.6V31.7Z"/>
+          </g>
+        </g>
       </g>
       <g class="g1-ring">
         <path class="g1-arc a1" pathLength="360" d="M59.16,34.855 A27.31,27.31 0 0 1 32,59.31"/>
@@ -1113,6 +1140,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
       <p style="margin-top:22px;font-size:12px;line-height:1.8;color:var(--on-surface-var)">
         介面樣式與動態規範依據 Google <b>Material Design 3</b> 與開源專案
         <b>androidx.core.splashscreen</b>（Apache License 2.0・著作權 The Android Open Source Project）。
+        「龍」字輪廓取自 <b>Noto Sans CJK</b>（SIL Open Font License 1.1・著作權 Google）。
         本站程式碼為自有著作，未包含任何 Google 專有（非開源）程式碼或品牌資產。
       </p>
     </div>
