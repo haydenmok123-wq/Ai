@@ -442,9 +442,14 @@ footer{border-top:1px solid var(--outline-var);background:var(--surface-1);margi
    全程只動 opacity / transform，採 Material fade-through
    ========================================================== */
 html{scrollbar-gutter:stable}
+/* ---------- 開場：Google One 式四色環 ----------
+   取自實機 Google One APK 的真實標誌幾何：
+   畫布 64、圓心 (32,32)、外徑 29.33 / 內徑 25.29（環寬 4.04）
+   四色弧邊對邊相接（僅留極細接縫），0°=3 點鐘、逆時針組裝
+   ========================================================== */
 .intro{display:none}
 html.intro-run .intro{
-  display:grid;grid-template-rows:1fr auto auto;place-items:center;
+  display:grid;grid-template-rows:1fr auto;place-items:center;
   position:fixed;inset:0;z-index:200;padding:32px 24px;
   background:var(--surface);
   will-change:opacity,transform;
@@ -452,99 +457,40 @@ html.intro-run .intro{
 html.intro-run{overflow:hidden}
 html.intro-run body{overflow:hidden}
 
-/* 場景容器：三幕疊在同一位置，逐幕淡入淡出 */
-.scenes{position:relative;width:100%;display:grid;place-items:center;min-height:min(400px,58vh)}
-.scene{
-  position:absolute;inset:0;display:grid;place-content:center;justify-items:center;
-  text-align:center;pointer-events:none;
-  opacity:0;transform:translate3d(0,14px,0) scale(.985);
+.g1{display:grid;justify-items:center}
+.g1-mark{width:clamp(92px,25vw,116px);height:auto;display:block;
+  animation:g1-settle 2.2s var(--e-emph) 1.2s both}
+.g1-ring{transform-origin:32px 32px;
+  animation:g1-turn 1.25s var(--e-emph-dec) both}
+/* 每段弧長 84 單位（1 單位 = 1°，見 pathLength），逆時針畫出 */
+.g1-arc{
+  fill:none;stroke-width:4.04;stroke-linecap:butt;
+  stroke-dasharray:360;stroke-dashoffset:360;
+  animation:g1-draw .9s var(--e-emph-dec) both;
 }
-/* 第一幕初始可見；務必排在 .on/.out 之前，否則它會蓋掉離場動畫 */
-.scene.auto{opacity:1;transform:none}
-.scene.on{
-  opacity:1;transform:none;
-  transition:opacity .7s var(--e-emph-dec),transform .7s var(--e-emph-dec);
-}
-.scene.out{
-  opacity:0;transform:translate3d(0,-10px,0) scale(1.012);
-  transition:opacity .42s var(--e-emph-acc),transform .42s var(--e-emph-acc);
-}
+.g1-arc.a1{stroke:#4285F4;animation-delay:.10s}
+.g1-arc.a2{stroke:#EA4335;animation-delay:.34s}
+.g1-arc.a3{stroke:#FBBC05;animation-delay:.58s}
+.g1-arc.a4{stroke:#34A853;animation-delay:.82s}
+@keyframes g1-draw{from{stroke-dashoffset:360}to{stroke-dashoffset:276}}
+@keyframes g1-turn{from{transform:rotate(-15deg) scale(.94)}
+                   to{transform:rotate(0deg) scale(1)}}
+@keyframes g1-settle{0%{transform:scale(1)}40%{transform:scale(1.035)}
+                     74%{transform:scale(.996)}100%{transform:scale(1)}}
 
-/* ---------- 第一幕：Logo 逐字進場 ---------- */
-.lockup{display:flex;align-items:baseline;line-height:1;
-  font-size:clamp(46px,11vw,78px);font-weight:500;letter-spacing:-3.5px}
-.ltr{
-  display:inline-block;
-  opacity:0;transform:translate3d(0,24px,0) scale(.86);
-  animation:ltr-in 1.15s var(--e-emph-dec) both;
-  will-change:transform,opacity;
-}
-.scene[data-s="1"] .ltr:nth-child(1){animation-delay:.18s}
-.scene[data-s="1"] .ltr:nth-child(2){animation-delay:.34s}
-.scene[data-s="1"] .ltr:nth-child(3){animation-delay:.50s}
-.scene[data-s="1"] .ltr:nth-child(4){animation-delay:.66s}
-@keyframes ltr-in{to{opacity:1;transform:none}}
-.pro{font-size:.24em;font-weight:400;letter-spacing:0;padding-left:14px;color:var(--on-surface-var);
+.g1-name{margin-top:26px;font-size:clamp(26px,7.4vw,34px);font-weight:500;
+  letter-spacing:-1.2px;color:var(--on-surface);
+  opacity:0;transform:translate3d(0,14px,0);
+  animation:g1-up .84s var(--e-emph-dec) 1.14s both}
+.g1-say{margin-top:10px;font-size:14px;color:var(--on-surface-var);letter-spacing:.2px;
   opacity:0;transform:translate3d(0,10px,0);
-  animation:ltr-in .9s var(--e-emph-dec) .86s both}
-.say{margin-top:22px;font-size:14px;color:var(--on-surface-var);letter-spacing:.2px;
-  opacity:0;transform:translate3d(0,10px,0);
-  animation:ltr-in .95s var(--e-emph-dec) 1.06s both}
+  animation:g1-up .88s var(--e-emph-dec) 1.52s both}
+@keyframes g1-up{to{opacity:1;transform:none}}
 
-/* ---------- 第二、三幕共用 ---------- */
-.line{
-  font-size:clamp(24px,5.2vw,38px);font-weight:400;letter-spacing:-1px;line-height:1.3;
-  color:var(--on-surface);
-}
-.line .accent{color:var(--primary)}
-.subline{margin-top:12px;font-size:14px;color:var(--on-surface-var)}
-
-/* 迷你對話（第二幕） */
-.mini{margin-top:30px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.mrow{display:flex;align-items:center;gap:10px;opacity:0;transform:translate3d(0,10px,0)}
-.scene.on .mrow{animation:ltr-in .7s var(--e-emph-dec) both}
-.scene.on .mrow:nth-child(1){animation-delay:.12s}
-.scene.on .mrow:nth-child(2){animation-delay:.62s}
-.scene.on .mrow:nth-child(3){animation-delay:1.12s}
-.mav{width:26px;height:26px;border-radius:50%;flex:0 0 26px;display:grid;place-items:center;
-  font-size:11px;font-weight:500}
-.mav.me{background:var(--surface-2);color:var(--on-surface-2)}
-.mav.ai{background:var(--primary-container);color:var(--on-primary-container)}
-.mb{padding:9px 15px;border-radius:16px;font-size:13.5px;
-  background:var(--surface-1);border:1px solid var(--outline-var);color:var(--on-surface)}
-.mrow.me{align-self:flex-end;flex-direction:row-reverse}
-.mrow.me .mb{background:var(--primary);color:var(--on-primary);border-color:transparent}
-
-/* 能力標籤（第三幕） */
-.pills{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.pill{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:var(--r-full);font-size:13.5px;
-  background:var(--surface-1);color:var(--on-surface-2);border:1px solid var(--outline-var);
-  opacity:0;transform:translate3d(0,10px,0) scale(.96);
-}
-.scene.on .pill{animation:ltr-in .7s var(--e-emph-dec) both}
-.scene.on .pill:nth-child(1){animation-delay:.12s}
-.scene.on .pill:nth-child(2){animation-delay:.50s}
-.scene.on .pill:nth-child(3){animation-delay:.88s}
-.scene.on .pill:nth-child(4){animation-delay:1.26s}
-.pill svg{width:16px;height:16px;color:var(--green);flex:0 0 16px}
-
-/* ---------- 進度條 ---------- */
-.load{
-  margin-top:34px;width:min(220px,52vw);height:3px;border-radius:2px;
-  background:var(--surface-2);overflow:hidden;
-}
-.load i{
-  display:block;height:100%;border-radius:2px;background:var(--primary);
-  transform:scaleX(0);transform-origin:left center;
-  animation:sweep 7.4s linear .35s both;
-}
-@keyframes sweep{to{transform:scaleX(1)}}
 @keyframes fade-in{to{opacity:1}}
 .skip{
   margin-top:22px;font-size:12px;color:var(--on-surface-var);
-  opacity:0;animation:fade-in .6s var(--e-std) 2.1s both;
+  opacity:0;animation:fade-in .6s var(--e-std) 1.9s both;
 }
 
 /* ---------- 離場：放大淡出 ---------- */
@@ -575,7 +521,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   var d=document.documentElement;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var seen=false;
-  try{ seen=sessionStorage.getItem('jl-intro')==='1'; }catch(e){}
+  try{ seen=sessionStorage.getItem('jl-intro-v2')==='1'; }catch(e){}
   if(reduce||seen) return;
 
   d.classList.add('intro-run');
@@ -585,7 +531,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   function finish(fast){
     if(done) return; done=true;
     for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
-    try{ sessionStorage.setItem('jl-intro','1'); }catch(e){}
+    try{ sessionStorage.setItem('jl-intro-v2','1'); }catch(e){}
     var hero=document.querySelector('.hero');
     var bar=document.querySelector('.appbar');
     if(hero) hero.classList.add('go');
@@ -602,24 +548,9 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
     }, (fast?420:620)+700);
   }
 
-  /* 逐幕切換：先讓當前幕淡出，再把下一幕淡入（Material fade-through） */
-  function switchTo(n, outMs, inMs){
-    var cur=document.querySelector('.scene.on');
-    if(cur){ cur.classList.remove('on'); cur.classList.add('out'); }
-    at(outMs, function(){
-      var nx=document.querySelector('.scene[data-s="'+n+'"]');
-      if(nx){ nx.classList.remove('out'); nx.classList.add('on'); }
-    });
-    return outMs+inMs;
-  }
-
-  /* ---- 時間軸（覺得太快／太慢，改這三個數字就好，單位毫秒）---- */
-  var T={ s1:2200,   /* 第一幕結束、切到第二幕 */
-          s2:5400,   /* 第二幕結束、切到第三幕 */
-          s3:8200 }; /* 第三幕結束、收場進主頁 */
-  at(T.s1, function(){ switchTo(2, 420, 0); });   /* 第二幕：描述需求 */
-  at(T.s2, function(){ switchTo(3, 420, 0); });   /* 第三幕：動手完成 */
-  at(T.s3, function(){ finish(false); });         /* 收場，交叉進主頁 */
+  /* ---- 時間軸（Google One 式四色環；太快／太慢改這一個數字，單位毫秒）---- */
+  var T={ end:3600 };            /* 動畫結束、收場交叉進主頁 */
+  at(T.end, function(){ finish(false); });
 
   /* ---- 略過 ---- */
   ['pointerdown','keydown','wheel','touchstart'].forEach(function(ev){
@@ -627,53 +558,21 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   });
 })();
 </script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%231a73e8%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-size=%2718%27 text-anchor=%27middle%27 fill=%27white%27%3E%E9%87%91%3C/text%3E%3C/svg%3E">
-<meta property="og:type" content="website">
-<meta property="og:title" content="金龍AI-Pro - 手機上的全能 AI 助理">
-<meta property="og:description" content="會思考，也能動手：執行指令、讀寫檔案、控制裝置、定時跑任務。">
-<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <div class="intro" id="intro" aria-hidden="true">
-  <div class="scenes">
-
-    <section class="scene auto on" data-s="1">
-      <div>
-        <div class="lockup">
-          <span class="ltr w1">金</span><span class="ltr w2">龍</span><span class="ltr w3">A</span><span class="ltr w4">I</span>
-          <span class="pro">-Pro</span>
-        </div>
-        <div class="say">手機上的全能 AI 助理</div>
-      </div>
-    </section>
-
-    <section class="scene" data-s="2">
-      <div>
-        <div class="line">描述你要做的事<span class="accent">，</span></div>
-        <div class="subline">用平常講話的方式就好</div>
-        <div class="mini">
-          <div class="mrow me"><span class="mav me">你</span><span class="mb">幫我把這份月報整理成圖表</span></div>
-          <div class="mrow"><span class="mav ai">龍</span><span class="mb">好的，先讀取欄位再分組彙總</span></div>
-          <div class="mrow"><span class="mav ai">龍</span><span class="mb">完成，圖表已輸出並開好連結</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="scene" data-s="3">
-      <div>
-        <div class="line">它會<span class="accent">真的做完</span></div>
-        <div class="subline">不只是回答問題</div>
-        <div class="pills">
-          <span class="pill"><svg><use href="#i-check"/></svg>執行指令</span>
-          <span class="pill"><svg><use href="#i-check"/></svg>操作檔案</span>
-          <span class="pill"><svg><use href="#i-check"/></svg>跑程式</span>
-          <span class="pill"><svg><use href="#i-check"/></svg>開服務</span>
-        </div>
-      </div>
-    </section>
-
+  <div class="g1">
+    <svg class="g1-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <g class="g1-ring">
+        <path class="g1-arc a1" pathLength="360" d="M59.31,32 A27.31,27.31 0 0 0 34.855,4.84"/>
+        <path class="g1-arc a2" pathLength="360" d="M32,4.69 A27.31,27.31 0 0 0 4.84,29.145"/>
+        <path class="g1-arc a3" pathLength="360" d="M4.69,32 A27.31,27.31 0 0 0 29.145,59.16"/>
+        <path class="g1-arc a4" pathLength="360" d="M32,59.31 A27.31,27.31 0 0 0 59.16,34.855"/>
+      </g>
+    </svg>
+    <div class="g1-name">金龍AI-Pro</div>
+    <div class="g1-say">手機上的全能 AI 助理</div>
   </div>
-  <div class="load"><i></i></div>
   <div class="skip">點一下略過</div>
 </div>
 
