@@ -445,7 +445,7 @@ html{scrollbar-gutter:stable}
 /* ---------- 開場：Google One 式四色環 ----------
    取自實機 Google One APK 的真實標誌幾何：
    畫布 64、圓心 (32,32)、外徑 29.33 / 內徑 25.29（環寬 4.04）
-   四色弧邊對邊相接（僅留極細接縫），0°=3 點鐘、逆時針組裝
+   四色弧邊對邊相接（僅留極細接縫），0°=3 點鐘、順時針組裝（由綠→黃→紅→藍）
    ========================================================== */
 .intro{display:none}
 html.intro-run .intro{
@@ -462,18 +462,18 @@ html.intro-run body{overflow:hidden}
   animation:g1-settle 2.2s var(--e-emph) 1.2s both}
 .g1-ring{transform-origin:32px 32px;
   animation:g1-turn 1.25s var(--e-emph-dec) both}
-/* 每段弧長 84 單位（1 單位 = 1°，見 pathLength），逆時針畫出 */
+/* 每段弧長 84 單位（1 單位 = 1°，見 pathLength），順時針畫出（sweep=1） */
 .g1-arc{
   fill:none;stroke-width:4.04;stroke-linecap:butt;
   stroke-dasharray:360;stroke-dashoffset:360;
   animation:g1-draw .9s var(--e-emph-dec) both;
 }
-.g1-arc.a1{stroke:#4285F4;animation-delay:.10s}
-.g1-arc.a2{stroke:#EA4335;animation-delay:.34s}
-.g1-arc.a3{stroke:#FBBC05;animation-delay:.58s}
-.g1-arc.a4{stroke:#34A853;animation-delay:.82s}
+.g1-arc.a1{stroke:#34A853;animation-delay:.10s}
+.g1-arc.a2{stroke:#FBBC05;animation-delay:.34s}
+.g1-arc.a3{stroke:#EA4335;animation-delay:.58s}
+.g1-arc.a4{stroke:#4285F4;animation-delay:.82s}
 @keyframes g1-draw{from{stroke-dashoffset:360}to{stroke-dashoffset:276}}
-@keyframes g1-turn{from{transform:rotate(-15deg) scale(.94)}
+@keyframes g1-turn{from{transform:rotate(15deg) scale(.94)}
                    to{transform:rotate(0deg) scale(1)}}
 @keyframes g1-settle{0%{transform:scale(1)}40%{transform:scale(1.035)}
                      74%{transform:scale(.996)}100%{transform:scale(1)}}
@@ -564,10 +564,10 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   <div class="g1">
     <svg class="g1-mark" viewBox="0 0 64 64" aria-hidden="true">
       <g class="g1-ring">
-        <path class="g1-arc a1" pathLength="360" d="M59.31,32 A27.31,27.31 0 0 0 34.855,4.84"/>
-        <path class="g1-arc a2" pathLength="360" d="M32,4.69 A27.31,27.31 0 0 0 4.84,29.145"/>
-        <path class="g1-arc a3" pathLength="360" d="M4.69,32 A27.31,27.31 0 0 0 29.145,59.16"/>
-        <path class="g1-arc a4" pathLength="360" d="M32,59.31 A27.31,27.31 0 0 0 59.16,34.855"/>
+        <path class="g1-arc a1" pathLength="360" d="M59.16,34.855 A27.31,27.31 0 0 1 32,59.31"/>
+        <path class="g1-arc a2" pathLength="360" d="M29.145,59.16 A27.31,27.31 0 0 1 4.69,32"/>
+        <path class="g1-arc a3" pathLength="360" d="M4.84,29.145 A27.31,27.31 0 0 1 32,4.69"/>
+        <path class="g1-arc a4" pathLength="360" d="M34.855,4.84 A27.31,27.31 0 0 1 59.31,32"/>
       </g>
     </svg>
     <div class="g1-name">金龍AI-Pro</div>
