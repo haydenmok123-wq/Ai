@@ -447,6 +447,12 @@ html{scrollbar-gutter:stable}
    畫布 64、圓心 (32,32)、外徑 29.33 / 內徑 25.29（環寬 4.04）
    四色弧邊對邊相接（僅留極細接縫），0°=3 點鐘、順時針組裝（由綠→黃→紅→藍）
    ========================================================== */
+/* ---------- 開場：雲 → 一條線 → 畫成「1」→ 四色環 ----------
+   動效取自 Google One 啟動動畫的語言（雲 → 線 → 「1」 → 環）
+   幾何取自實機 Google One APK：
+     「1」＝藍色豎筆(#4285F4)＋黃色斜旗(#FBBC05)
+     四色環＝畫布 64、圓心 (32,32)、外徑 29.33 / 內徑 25.29
+   ========================================================== */
 .intro{display:none}
 html.intro-run .intro{
   display:grid;grid-template-rows:1fr auto;place-items:center;
@@ -458,39 +464,58 @@ html.intro-run{overflow:hidden}
 html.intro-run body{overflow:hidden}
 
 .g1{display:grid;justify-items:center}
-.g1-mark{width:clamp(92px,25vw,116px);height:auto;display:block;
-  animation:g1-settle 2.2s var(--e-emph) 1.2s both}
+.g1-mark{width:clamp(96px,26vw,120px);height:auto;display:block}
+
+/* ① 雲：先畫出來，再收掉 */
+.g1-cloud{
+  fill:none;stroke:var(--on-surface-var);stroke-width:2.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:100;stroke-dashoffset:100;
+  transform-origin:32px 36px;
+  animation:g1-cloud-in .75s var(--e-emph-dec) both,
+            g1-cloud-out .52s var(--e-emph-acc) .78s both;
+}
+@keyframes g1-cloud-in{to{stroke-dashoffset:0}}
+@keyframes g1-cloud-out{to{opacity:0;transform:scale(.7)}}
+
+/* ② 線：一筆一筆畫成「1」 */
+.g1-one{fill:none;stroke-width:7.2;stroke-linecap:round;stroke-linejoin:round}
+.g1-one path{stroke-dasharray:100;stroke-dashoffset:100;
+  animation:g1-one-draw .62s var(--e-emph-dec) both}
+.g1-one .o1{stroke:#FBBC05;animation-delay:.86s}    /* 斜旗 */
+.g1-one .o2{stroke:#4285F4;animation-delay:1.18s}   /* 豎筆 */
+@keyframes g1-one-draw{to{stroke-dashoffset:0}}
+
+/* ③ 四色環：順時針繞上（綠 → 黃 → 紅 → 藍） */
 .g1-ring{transform-origin:32px 32px;
-  animation:g1-turn 1.25s var(--e-emph-dec) both}
-/* 每段弧長 84 單位（1 單位 = 1°，見 pathLength），順時針畫出（sweep=1） */
+  animation:g1-turn 1.2s var(--e-emph-dec) 1.9s both}
 .g1-arc{
   fill:none;stroke-width:4.04;stroke-linecap:butt;
   stroke-dasharray:360;stroke-dashoffset:360;
   animation:g1-draw .9s var(--e-emph-dec) both;
 }
-.g1-arc.a1{stroke:#34A853;animation-delay:.10s}
-.g1-arc.a2{stroke:#FBBC05;animation-delay:.34s}
-.g1-arc.a3{stroke:#EA4335;animation-delay:.58s}
-.g1-arc.a4{stroke:#4285F4;animation-delay:.82s}
+.g1-arc.a1{stroke:#34A853;animation-delay:2.00s}
+.g1-arc.a2{stroke:#FBBC05;animation-delay:2.24s}
+.g1-arc.a3{stroke:#EA4335;animation-delay:2.48s}
+.g1-arc.a4{stroke:#4285F4;animation-delay:2.72s}
 @keyframes g1-draw{from{stroke-dashoffset:360}to{stroke-dashoffset:276}}
 @keyframes g1-turn{from{transform:rotate(15deg) scale(.94)}
                    to{transform:rotate(0deg) scale(1)}}
-@keyframes g1-settle{0%{transform:scale(1)}40%{transform:scale(1.035)}
-                     74%{transform:scale(.996)}100%{transform:scale(1)}}
 
+/* ④ 字標與標語 */
 .g1-name{margin-top:26px;font-size:clamp(26px,7.4vw,34px);font-weight:500;
   letter-spacing:-1.2px;color:var(--on-surface);
   opacity:0;transform:translate3d(0,14px,0);
-  animation:g1-up .84s var(--e-emph-dec) 1.14s both}
+  animation:g1-up .84s var(--e-emph-dec) 2.90s both}
 .g1-say{margin-top:10px;font-size:14px;color:var(--on-surface-var);letter-spacing:.2px;
   opacity:0;transform:translate3d(0,10px,0);
-  animation:g1-up .88s var(--e-emph-dec) 1.52s both}
+  animation:g1-up .88s var(--e-emph-dec) 3.30s both}
 @keyframes g1-up{to{opacity:1;transform:none}}
 
 @keyframes fade-in{to{opacity:1}}
 .skip{
   margin-top:22px;font-size:12px;color:var(--on-surface-var);
-  opacity:0;animation:fade-in .6s var(--e-std) 1.9s both;
+  opacity:0;animation:fade-in .6s var(--e-std) 1.6s both;
 }
 
 /* ---------- 離場：放大淡出 ---------- */
@@ -521,7 +546,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   var d=document.documentElement;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var seen=false;
-  try{ seen=sessionStorage.getItem('jl-intro-v2')==='1'; }catch(e){}
+  try{ seen=sessionStorage.getItem('jl-intro-v3')==='1'; }catch(e){}
   if(reduce||seen) return;
 
   d.classList.add('intro-run');
@@ -531,7 +556,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   function finish(fast){
     if(done) return; done=true;
     for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
-    try{ sessionStorage.setItem('jl-intro-v2','1'); }catch(e){}
+    try{ sessionStorage.setItem('jl-intro-v3','1'); }catch(e){}
     var hero=document.querySelector('.hero');
     var bar=document.querySelector('.appbar');
     if(hero) hero.classList.add('go');
@@ -549,7 +574,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   }
 
   /* ---- 時間軸（Google One 式四色環；太快／太慢改這一個數字，單位毫秒）---- */
-  var T={ end:3600 };            /* 動畫結束、收場交叉進主頁 */
+  var T={ end:4300 };            /* 動畫結束、收場交叉進主頁 */
   at(T.end, function(){ finish(false); });
 
   /* ---- 略過 ---- */
@@ -563,6 +588,12 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
 <div class="intro" id="intro" aria-hidden="true">
   <div class="g1">
     <svg class="g1-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <path class="g1-cloud" pathLength="100"
+            d="M18,44 a8,8 0 0 1 2.2,-15.6 a10.5,10.5 0 0 1 19.3,-2.9 a7.5,7.5 0 0 1 6.5,18.5 z"/>
+      <g class="g1-one">
+        <path class="o1" pathLength="100" d="M22.6,25.4 L32,15.4"/>
+        <path class="o2" pathLength="100" d="M32,15.4 V47"/>
+      </g>
       <g class="g1-ring">
         <path class="g1-arc a1" pathLength="360" d="M59.16,34.855 A27.31,27.31 0 0 1 32,59.31"/>
         <path class="g1-arc a2" pathLength="360" d="M29.145,59.16 A27.31,27.31 0 0 1 4.69,32"/>
