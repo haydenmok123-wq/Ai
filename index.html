@@ -603,6 +603,93 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   html.intro-run .intro{display:none!important}
   html.intro-run .hero>*,html.intro-run .appbar{opacity:1!important;transform:none!important}
 }
+
+/* ==========================================================
+   液態玻璃（Liquid Glass）
+   ・玻璃 = 半透明 + backdrop-filter 模糊/提色 + 內緣高光 + 柔陰影
+   ・「液態」= 背景四色柔光極慢漂移 + 掠過玻璃的高光掃描
+   ・實測友善：只在固定/少量元素上用 backdrop-filter，卡片用輕量版
+   ========================================================== */
+:root{
+  --lg-blur:20px;
+  --lg-sat:180%;
+  --lg-tint:rgba(255,255,255,.60);
+  --lg-tint-soft:rgba(255,255,255,.46);
+  --lg-line:rgba(255,255,255,.72);
+  --lg-shadow:0 10px 30px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05);
+  --lg-inner:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 0 rgba(255,255,255,.22);
+  --amb-a:.30;                 /* 背景柔光強度（淺色） */
+}
+html[data-theme="dark"]{
+  --lg-tint:rgba(32,33,36,.58);
+  --lg-tint-soft:rgba(41,42,45,.44);
+  --lg-line:rgba(255,255,255,.12);
+  --lg-shadow:0 10px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+  --lg-inner:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(255,255,255,.04);
+  --amb-a:.40;
+}
+
+/* 背景柔光層（四色，極慢漂移） */
+.ambient{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.ambient span{position:absolute;width:58vmax;height:58vmax;border-radius:50%;
+  filter:blur(64px);opacity:var(--amb-a);will-change:transform}
+.ambient .a1{background:#4285F4;left:-14%;top:-16%;animation:amb1 36s var(--e-std) infinite alternate}
+.ambient .a2{background:#EA4335;right:-18%;top:2%;animation:amb2 43s var(--e-std) infinite alternate}
+.ambient .a3{background:#FBBC04;left:4%;bottom:-20%;animation:amb3 50s var(--e-std) infinite alternate}
+.ambient .a4{background:#34A853;right:-8%;bottom:-14%;animation:amb4 40s var(--e-std) infinite alternate}
+@keyframes amb1{to{transform:translate3d(10vmax,7vmax,0) scale(1.13)}}
+@keyframes amb2{to{transform:translate3d(-9vmax,10vmax,0) scale(1.09)}}
+@keyframes amb3{to{transform:translate3d(11vmax,-8vmax,0) scale(1.11)}}
+@keyframes amb4{to{transform:translate3d(-8vmax,-9vmax,0) scale(1.07)}}
+
+/* 真玻璃：模糊背景（用在固定/少量元素上） */
+.appbar,.searchbar,.fab{
+  background:var(--lg-tint)!important;
+  border:1px solid var(--lg-line)!important;
+  box-shadow:var(--lg-shadow),var(--lg-inner)!important;
+  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+}
+/* 輕玻璃：半透明＋內緣高光（卡片/FAQ，手機上便宜很多） */
+.card,.qa,.qa.open{
+  background:var(--lg-tint-soft)!important;
+  border-color:var(--lg-line)!important;
+  box-shadow:0 6px 22px rgba(16,24,40,.07), var(--lg-inner)!important;
+  backdrop-filter:blur(8px) saturate(150%);
+  -webkit-backdrop-filter:blur(8px) saturate(150%);
+}
+html[data-theme="dark"] .card,html[data-theme="dark"] .qa,html[data-theme="dark"] .qa.open{
+  box-shadow:0 6px 22px rgba(0,0,0,.35), var(--lg-inner)!important;
+}
+/* 「液態」：高光緩慢掠過（只給頂部列與 FAB，避免太多動畫層） */
+.appbar,.fab{position:relative;isolation:isolate}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)){
+  .appbar::after,.fab::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(112deg,transparent 34%,rgba(255,255,255,.5) 47%,rgba(255,255,255,.14) 53%,transparent 66%);
+    background-size:280% 100%;background-position:135% 0;opacity:0;
+    animation:lg-sheen 11s var(--e-emph) 1.4s infinite;
+  }
+}
+@keyframes lg-sheen{
+  0%{background-position:135% 0;opacity:0}
+  10%{opacity:.9}
+  28%{background-position:-40% 0;opacity:0}
+  100%{background-position:-40% 0;opacity:0}
+}
+/* 玻璃的 hover／focus 回饋（保住原本的抬升感） */
+.card:hover,.searchbar:hover,.searchbar:focus-within{
+  box-shadow:0 14px 34px rgba(16,24,40,.13), var(--lg-inner)!important;
+}
+html[data-theme="dark"] .card:hover,
+html[data-theme="dark"] .searchbar:hover,
+html[data-theme="dark"] .searchbar:focus-within{
+  box-shadow:0 14px 34px rgba(0,0,0,.5), var(--lg-inner)!important;
+}
+@media (prefers-reduced-motion: reduce){
+  .ambient{display:none}
+  .appbar::after,.fab::after{display:none}
+}
 </style>
 <script>
 /* 開場介紹動畫排程：在主要內容之前先執行，避免主內容先閃一下 */
@@ -669,6 +756,9 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
 </script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true">
+  <span class="a1"></span><span class="a2"></span><span class="a3"></span><span class="a4"></span>
+</div>
 <div class="intro" id="intro" aria-hidden="true">
   <div class="intro-stage">
     <div class="g1">
