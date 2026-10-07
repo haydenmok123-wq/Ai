@@ -517,6 +517,73 @@ html.intro-run body{overflow:hidden}
   animation:g1-up .88s var(--e-emph-dec) 3.30s both}
 @keyframes g1-up{to{opacity:1;transform:none}}
 
+/* ---------- 第二階段：沿用舊的三幕中介紹（第 2、3 幕）---------- */
+.intro-stage{position:relative;width:100%;display:grid;place-items:center;
+  min-height:min(400px,58vh)}
+.intro-stage>*{grid-area:1/1}
+.g1{transition:opacity .45s var(--e-emph-acc),transform .45s var(--e-emph-acc)}
+.g1.gone{opacity:0;transform:translate3d(0,-10px,0) scale(1.012);pointer-events:none}
+
+/* 場景容器：三幕疊在同一位置，逐幕淡入淡出 */
+.scenes{position:relative;width:100%;display:grid;place-items:center;min-height:min(400px,58vh)}
+.scene{
+  position:absolute;inset:0;display:grid;place-content:center;justify-items:center;
+  text-align:center;pointer-events:none;
+  opacity:0;transform:translate3d(0,14px,0) scale(.985);
+}
+/* 第一幕初始可見；務必排在 .on/.out 之前，否則它會蓋掉離場動畫 */
+.scene.auto{opacity:1;transform:none}
+.scene.on{
+  opacity:1;transform:none;
+  transition:opacity .7s var(--e-emph-dec),transform .7s var(--e-emph-dec);
+}
+.scene.out{
+  opacity:0;transform:translate3d(0,-10px,0) scale(1.012);
+  transition:opacity .42s var(--e-emph-acc),transform .42s var(--e-emph-acc);
+}
+
+@keyframes ltr-in{to{opacity:1;transform:none}}
+
+/* ---------- 第二、三幕共用 ---------- */
+.line{
+  font-size:clamp(24px,5.2vw,38px);font-weight:400;letter-spacing:-1px;line-height:1.3;
+  color:var(--on-surface);
+}
+.line .accent{color:var(--primary)}
+.subline{margin-top:12px;font-size:14px;color:var(--on-surface-var)}
+
+/* 迷你對話（第二幕） */
+.mini{margin-top:30px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.mrow{display:flex;align-items:center;gap:10px;opacity:0;transform:translate3d(0,10px,0)}
+.scene.on .mrow{animation:ltr-in .7s var(--e-emph-dec) both}
+.scene.on .mrow:nth-child(1){animation-delay:.12s}
+.scene.on .mrow:nth-child(2){animation-delay:.62s}
+.scene.on .mrow:nth-child(3){animation-delay:1.12s}
+.mav{width:26px;height:26px;border-radius:50%;flex:0 0 26px;display:grid;place-items:center;
+  font-size:11px;font-weight:500}
+.mav.me{background:var(--surface-2);color:var(--on-surface-2)}
+.mav.ai{background:var(--primary-container);color:var(--on-primary-container)}
+.mb{padding:9px 15px;border-radius:16px;font-size:13.5px;
+  background:var(--surface-1);border:1px solid var(--outline-var);color:var(--on-surface)}
+.mrow.me{align-self:flex-end;flex-direction:row-reverse}
+.mrow.me .mb{background:var(--primary);color:var(--on-primary);border-color:transparent}
+
+/* 能力標籤（第三幕） */
+.pills{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:var(--r-full);font-size:13.5px;
+  background:var(--surface-1);color:var(--on-surface-2);border:1px solid var(--outline-var);
+  opacity:0;transform:translate3d(0,10px,0) scale(.96);
+}
+.scene.on .pill{animation:ltr-in .7s var(--e-emph-dec) both}
+.scene.on .pill:nth-child(1){animation-delay:.12s}
+.scene.on .pill:nth-child(2){animation-delay:.50s}
+.scene.on .pill:nth-child(3){animation-delay:.88s}
+.scene.on .pill:nth-child(4){animation-delay:1.26s}
+.pill svg{width:16px;height:16px;color:var(--green);flex:0 0 16px}
+
+
 @keyframes fade-in{to{opacity:1}}
 .skip{
   margin-top:22px;font-size:12px;color:var(--on-surface-var);
@@ -551,7 +618,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   var d=document.documentElement;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var seen=false;
-  try{ seen=sessionStorage.getItem('jl-intro-v4')==='1'; }catch(e){}
+  try{ seen=sessionStorage.getItem('jl-intro-v5')==='1'; }catch(e){}
   if(reduce||seen) return;
 
   d.classList.add('intro-run');
@@ -561,7 +628,7 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
   function finish(fast){
     if(done) return; done=true;
     for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
-    try{ sessionStorage.setItem('jl-intro-v4','1'); }catch(e){}
+    try{ sessionStorage.setItem('jl-intro-v5','1'); }catch(e){}
     var hero=document.querySelector('.hero');
     var bar=document.querySelector('.appbar');
     if(hero) hero.classList.add('go');
@@ -578,8 +645,28 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
     }, (fast?420:620)+700);
   }
 
-  /* ---- 時間軸（Google One 式四色環；太快／太慢改這一個數字，單位毫秒）---- */
-  var T={ end:4300 };            /* 動畫結束、收場交叉進主頁 */
+  /* ---- 時間軸（單位毫秒，要調整改這一組）---- */
+  var T={ logo:4200,    /* ① 雲→龍→四色環 播完，開始收掉標誌 */
+          s2:4600,      /* ② 第二幕「描述你要做的事」進場 */
+          s3:7700,      /* ③ 第二幕退場、第三幕準備 */
+          s3in:8120,    /*    第三幕「它會真的做完」進場 */
+          end:10900 };  /* ④ 收場，交叉進主頁 */
+  at(T.logo, function(){
+    var g=document.querySelector('.g1');
+    if(g) g.classList.add('gone');
+  });
+  at(T.s2, function(){
+    var a=document.querySelector('.scene[data-s="2"]');
+    if(a) a.classList.add('on');
+  });
+  at(T.s3, function(){
+    var a=document.querySelector('.scene[data-s="2"]');
+    if(a){ a.classList.remove('on'); a.classList.add('out'); }
+  });
+  at(T.s3in, function(){
+    var b=document.querySelector('.scene[data-s="3"]');
+    if(b) b.classList.add('on');
+  });
   at(T.end, function(){ finish(false); });
 
   /* ---- 略過 ---- */
@@ -591,7 +678,8 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
 </head>
 <body>
 <div class="intro" id="intro" aria-hidden="true">
-  <div class="g1">
+  <div class="intro-stage">
+    <div class="g1">
     <svg class="g1-mark" viewBox="0 0 64 64" aria-hidden="true">
       <path class="g1-cloud" pathLength="100"
             d="M18,44 a8,8 0 0 1 2.2,-15.6 a10.5,10.5 0 0 1 19.3,-2.9 a7.5,7.5 0 0 1 6.5,18.5 z"/>
@@ -609,7 +697,35 @@ html.intro-run .hero.go>*{opacity:1;transform:none;
       </g>
     </svg>
     <div class="g1-name">金龍AI-Pro</div>
-    <div class="g1-say">手機上的全能 AI 助理</div>
+      <div class="g1-say">手機上的全能 AI 助理</div>
+    </div>
+
+    <div class="scenes">
+    <section class="scene" data-s="2">
+      <div>
+        <div class="line">描述你要做的事<span class="accent">，</span></div>
+        <div class="subline">用平常講話的方式就好</div>
+        <div class="mini">
+          <div class="mrow me"><span class="mav me">你</span><span class="mb">幫我把這份月報整理成圖表</span></div>
+          <div class="mrow"><span class="mav ai">龍</span><span class="mb">好的，先讀取欄位再分組彙總</span></div>
+          <div class="mrow"><span class="mav ai">龍</span><span class="mb">完成，圖表已輸出並開好連結</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" data-s="3">
+      <div>
+        <div class="line">它會<span class="accent">真的做完</span></div>
+        <div class="subline">不只是回答問題</div>
+        <div class="pills">
+          <span class="pill"><svg><use href="#i-check"/></svg>執行指令</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>操作檔案</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>跑程式</span>
+          <span class="pill"><svg><use href="#i-check"/></svg>開服務</span>
+        </div>
+      </div>
+    </section>
+    </div>
   </div>
   <div class="skip">點一下略過</div>
 </div>
