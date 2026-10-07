@@ -26,3 +26,15 @@ https://haydenmok123-wq.github.io/Ai/
 | 每段弧長度 | `@keyframes g1-draw` 終點 `276`（276 = 畫出 84°） |
 | 環的粗細 | `.g1-arc{stroke-width:4.04}` |
 | 繪製方向 | 四條 `<path>` 的 `sweep` 旗標（`1` = 順時針、`0` = 逆時針） |
+
+## 授權與致謝
+
+- **本站程式碼**：自有著作（金龍AI-Pro）。單檔、零外部依賴。
+- **介面樣式與動態規範**：依據 Google Material Design 3 動效規範，以及 Google 開源專案
+  [`androidx.core.splashscreen`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:core/core-splashscreen/)
+  與 [Material Components for Android](https://github.com/material-components/material-components-android)
+  —— 皆為 **Apache License 2.0**，著作權 The Android Open Source Project。
+- **未使用**：Google 專有（非開源）程式碼、Google One / Google Play 的應用程式資產或品牌標誌。
+  開場動畫的動作與比例為獨立重製（clean-room 風格重現），並採用 Google 開源的 trim-path 描邊技法。
+- 動效曲線採用 Material Design 3 公開權杖：standard `cubic-bezier(.2,0,0,1)`、
+  emphasized-decelerate `cubic-bezier(.05,.7,.1,1)`、emphasized-accelerate `cubic-bezier(.3,0,.8,.15)`。
